@@ -21,10 +21,10 @@ export default function App() {
         onAuthStateChanged(auth, (res) => {
             if (res?.emailVerified) {
                 setUser(res)
-                setLoading(true)
+                setLoading(false)
             } else {
                 setUser(null)
-                setLoading(true)
+                setLoading(false)
             }
             console.log(`${res?.email} from App.js !`)
         })
