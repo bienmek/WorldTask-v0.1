@@ -65,6 +65,16 @@ export const UserContextProvider = ({children}) => {
         return sendPasswordResetEmail(auth, email);
     }
 
+    const sendEmail = () => {
+        setLoading(true)
+        sendEmailVerification(auth.currentUser, {
+            handleCodeInApp: true,
+            url: "https://worldtask-test.firebaseapp.com"
+        })
+            .then(() => setLoading(false))
+            .catch((err) => console.error(err))
+    }
+
     const contextValue = {
         user,
         loading,
@@ -73,7 +83,8 @@ export const UserContextProvider = ({children}) => {
         registerUser,
         loginUser,
         logoutUser,
-        forgotPassword
+        forgotPassword,
+        sendEmail
     }
 
     return (

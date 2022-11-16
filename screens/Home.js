@@ -15,7 +15,6 @@ export default function Home({navigation}) {
                     title={"Se déconnecter"}
                     onPress={() => {
                         logoutUser()
-                        navigation.navigate("Landing")
                     }}
                 />
             </SafeAreaView>

@@ -12,7 +12,7 @@ export default function Landing ({navigation}) {
     const [loading, setLoading] = useState(false);
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
     const taskers = collection(db, "taskers")
-    const {user} = useUserContext()
+    const {user, logoutUser} = useUserContext()
 
     const handleOnPress = async () => {
         if (mail && !error) {
@@ -31,7 +31,7 @@ export default function Landing ({navigation}) {
     }
 
     useEffect(() => {
-        console.log(user)
+        console.log(`${user?.email} from Landing.js`)
         if ((regex.test(mail) === false && mail)) {
             setError("Erreur: Adresse e-mail invalide ou non autorisée.")
         } else {
@@ -67,6 +67,7 @@ export default function Landing ({navigation}) {
                         style={styles.input}
                         onChangeText={(mail) => setMail(mail)}
                         autoCorrect={false}
+                        keyboardType={"twitter"}
                     />
 
                     <TouchableOpacity

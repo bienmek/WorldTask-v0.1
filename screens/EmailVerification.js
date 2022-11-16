@@ -8,25 +8,30 @@ import {db} from "../firebase";
 export default function EmailVerification({route, navigation}) {
     const {routeMail, routePassword} = route.params
     const [error, setError] = useState("");
-    const {loginUser, user, loading, setLoading} = useUserContext()
+    const {loginUser, user, loading, setLoading, sendEmail, logoutUser} = useUserContext()
 
-    const resendEmail = () => {
+    const emailVerified = () => {
         setLoading(true)
         loginUser(routeMail, routePassword)
             .then(async (res) => {
                 if (res.user.emailVerified) {
+                    logoutUser()
+                    loginUser(routeMail, routePassword)
                     await setDoc(doc(db, "taskers", user.uid), {
                         email: user.email,
                         username: user.displayName,
                         stars: 0
                     })
-                    navigation.navigate("Home")
                 }
                 else {
                     setError("Erreur: vous n'avez pas fait vérifier votre adresse e-mail")
                 }
             })
             .finally(() => setLoading(false))
+    }
+
+    const resendEmail = () => {
+        sendEmail()
     }
 
     return (
@@ -47,10 +52,19 @@ export default function EmailVerification({route, navigation}) {
                 </View>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={resendEmail}
+                    onPress={emailVerified}
                 >
                     <Text style={{color: "white", fontSize: 16 ,fontWeight: "bold"}}>
                         Suivant
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.buttonWhite}
+                    onPress={resendEmail}
+                >
+                    <Text style={{color: "#25995C", fontSize: 16 ,fontWeight: "bold"}}>
+                        Renvoyer
                     </Text>
                 </TouchableOpacity>
 
@@ -66,6 +80,18 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         backgroundColor: "#25995C",
         borderRadius: 10,
+        marginTop: 15,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    buttonWhite: {
+        width: 300,
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: "white",
+        borderRadius: 10,
+        borderColor: "#25995C",
+        borderWidth: 1,
         marginTop: 15,
         justifyContent: "center",
         alignItems: "center"
