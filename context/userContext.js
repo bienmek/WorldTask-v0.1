@@ -40,7 +40,7 @@ export const UserContextProvider = ({children}) => {
         createUserWithEmailAndPassword(auth, email, password)
             .then(() =>
                 updateProfile(auth.currentUser, {
-                    displayName: username,
+                    displayName: username
                 })
             )
             .then(() => {
@@ -75,11 +75,12 @@ export const UserContextProvider = ({children}) => {
             .catch((err) => console.error(err))
     }
 
+
+
     const contextValue = {
         user,
         loading,
         errorContext,
-        setLoading,
         registerUser,
         loginUser,
         logoutUser,

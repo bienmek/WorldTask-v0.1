@@ -18,8 +18,10 @@ export default function EmailVerification({route, navigation}) {
                     logoutUser()
                     loginUser(routeMail, routePassword)
                     await setDoc(doc(db, "taskers", user.uid), {
+                        uid: user.uid,
                         email: user.email,
                         username: user.displayName,
+                        profilePicture: "https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05",
                         stars: 0
                     })
                 }
