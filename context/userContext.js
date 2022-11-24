@@ -1,5 +1,5 @@
 import {createContext, useContext, useEffect, useState} from "react";
-import {auth} from "../firebase";
+import {auth, db} from "../firebase";
 
 import {
     createUserWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
     updateProfile,
     sendEmailVerification
 } from "firebase/auth";
+import {collection, getDocs, query, where} from "firebase/firestore";
 
 const UserContext = createContext({})
 
@@ -75,12 +76,19 @@ export const UserContextProvider = ({children}) => {
             .catch((err) => console.error(err))
     }
 
+    const getUserFromDb = async (uid) => {
+        const taskers = collection(db, "taskers")
+        const q = query(taskers, where("uid", "==", uid))
+        return await getDocs(q)
+    }
 
 
     const contextValue = {
         user,
         loading,
         errorContext,
+        setLoading,
+        getUserFromDb,
         registerUser,
         loginUser,
         logoutUser,

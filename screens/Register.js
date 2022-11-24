@@ -15,7 +15,7 @@ export default function Register({route, navigation}) {
     const [registerInfo, setRegisterInfo] = useState({password: '', passwordConfirm: ''});
     const [error, setError] = useState("");
     const { routeMail } = route.params
-    const {registerUser, loading, user} = useUserContext()
+    const {registerUser, loading} = useUserContext()
 
     const onSubmit = () => {
         if (!error) {

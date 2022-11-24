@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Loading from "../Loading";
 
-export default function ImageSwap({images}) {
+export default function ImageSwap({images, imageHeight, imageMarginTop, imageIndexMarginTop}) {
     const scroll = useRef(null);
     const [imageNumber, setImageNumber] = useState(1);
     const [previousScroll, setPreviousScroll] = useState(0);
@@ -28,9 +28,9 @@ export default function ImageSwap({images}) {
                     justifyContent: "center",
                     alignItems: "center",
                     marginLeft: SCREEN_WIDTH-45,
-                    marginTop: 80,
+                    marginTop: imageIndexMarginTop,
                     zIndex: 99,
-                    opacity: 0.7
+                    opacity: 0.7,
                 }}
             >
                 <Text>{imageNumber}/{images.length}</Text>
@@ -38,7 +38,7 @@ export default function ImageSwap({images}) {
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={{marginTop: 10, width: "100%"}}
+                style={{marginTop: imageMarginTop, width: "100%", }}
                 scrollEventThrottle={16}
                 ref={scroll}
                 onScroll={(event) => setCurrentOffset(event.nativeEvent.contentOffset.x)}
@@ -64,7 +64,7 @@ export default function ImageSwap({images}) {
                             source={{uri: image}}
                             style={{
                                 width: SCREEN_WIDTH,
-                                height: 300,
+                                height: imageHeight,
                                 resizeMode: "cover"
                             }}
                             onLoadEnd={() => setLoading(false)}

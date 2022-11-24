@@ -7,17 +7,11 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import {useEffect, useState} from "react";
 import {useUserContext} from "../../context/userContext";
 
-export default function NewMissionCard({data}) {
+export default function NewMissionCard({data, navigation}) {
     const [hasVote, setHasVote] = useState(false);
     const [width, setWidth] = useState(60);
     const [percentage, setPercentage] = useState("...");
     const {user} = useUserContext()
-    let [fontsLoaded] = useFonts({
-        oxygen_regular: require('../../assets/font/Oxygen-Regular.ttf'),
-        oxygen_bold: require('../../assets/font/Oxygen-Bold.ttf'),
-        oxygen_light: require('../../assets/font/Oxygen-Light.ttf'),
-        introScript: require('../../assets/font/intro-script-demo-medium.otf')
-    });
 
     const computeVotePercentage = () => {
         const votes = data.votes
@@ -45,17 +39,17 @@ export default function NewMissionCard({data}) {
         }
     }, [data.votes, user]);
 
-    if (!fontsLoaded) {
-        return null
-    }
-
 
     return (
-        <View style={styles.card}>
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("NewMissionDetail", {missionData: data, hasVote})}
+            activeOpacity={0.7}
+        >
             <View style={styles.header}>
                 <View style={styles.upSide}>
                     <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>@{data.creator} · {data.created_at} mins</Text>
+                    <Text style={styles.sideText}>@{data.creator_username} · {data.created_at} mins</Text>
                 </View>
                 <View style={styles.downSide}>
                     <Ionicons
@@ -68,7 +62,8 @@ export default function NewMissionCard({data}) {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ImageSwap images={data.images}/>
+            <ImageSwap images={data.images} imageHeight={300} imageMarginTop={10} imageIndexMarginTop={80}/>
+
             <View style={styles.bottomSide}>
                 <View style={styles.commentBubble}>
                     <FontAwesome
@@ -76,11 +71,11 @@ export default function NewMissionCard({data}) {
                         size={30}
                         color={"black"}
                     />
-                    <Text style={{marginLeft: 5, fontSize: 18, fontFamily: "oxygen_bold"}}>{data.comments.length}</Text>
+                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
                 {!hasVote ? (
-                    <TouchableOpacity
+                    <View
                         style={{
                             flex: 1,
                             backgroundColor: "#25995C",
@@ -96,7 +91,7 @@ export default function NewMissionCard({data}) {
                             size={30}
                             color={"white"}
                         />
-                    </TouchableOpacity>
+                    </View>
                 ) : (
                     <View
                         style={{
@@ -121,7 +116,7 @@ export default function NewMissionCard({data}) {
                         </View>
                         <Text
                             style={{
-                                fontFamily: "oxygen_bold",
+                                fontWeight: "bold",
                                 fontSize: 18,
                                 color: "white",
                                 position: "absolute",
@@ -155,10 +150,10 @@ export default function NewMissionCard({data}) {
                         size={30}
                         color={"black"}
                     />
-                    <Text style={{marginLeft: 5, fontSize: 18, fontFamily: "oxygen_bold"}}>{data.shares.length}</Text>
+                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.shares.length}</Text>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     )
 }
 
@@ -177,8 +172,8 @@ const styles = StyleSheet.create({
         marginLeft: 5
     },
     title: {
-        fontFamily: "oxygen_bold",
-        fontSize: 20
+        fontWeight: "bold",
+        fontSize: 18
     },
     sideText: {
         color: "#959595",
@@ -198,7 +193,7 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontFamily: "oxygen_bold",
+        fontWeight: "bold",
         fontSize: 13,
         marginLeft: 3,
         textDecorationLine: "underline"

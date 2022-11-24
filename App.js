@@ -10,6 +10,7 @@ import {useEffect, useState} from "react";
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./firebase";
 import Loading from "./components/Loading";
+import NewMissionDetail from "./screens/NewMissionDetail";
 
 const Stack = createStackNavigator()
 
@@ -42,6 +43,7 @@ export default function App() {
                 <UserContextProvider>
                     <Stack.Navigator initialRouteName={"Home"}>
                         <Stack.Screen name={"Home"} component={Home} options={{headerShown: false}}/>
+                        <Stack.Screen name={"NewMissionDetail"} component={NewMissionDetail} options={{headerShown: false}}/>
                     </Stack.Navigator>
                 </UserContextProvider>
             </NavigationContainer>

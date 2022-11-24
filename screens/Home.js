@@ -10,47 +10,30 @@ import MissionReportCard from "../components/MissionCards/MissionReportCard";
 import AvailableMissionCard from "../components/MissionCards/AvailableMissionCard";
 import data from "../firebase/mission-data-sample"
 import Loading from "../components/Loading";
+import BottomTab from "../components/BottomTab";
 
 
 export default function Home({navigation}) {
-    const {user} = useUserContext()
-    const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [menuState, setMenuState] = useState(0);
-    const [newMissionLoading, setNewMissionLoading] = useState(false);
-    const [topTabLoading, setTopTabLoading] = useState(false);
-
-    const getProfilePicture = async () => {
-        if (user) {
-            const taskers = collection(db, "taskers")
-            const q = query(taskers, where("uid", "==", user.uid))
-            return await getDocs(q)
-        }
-    }
-
-    useEffect(() => {
-        getProfilePicture().then((res) => {
-            res?.forEach((doc) => {
-                console.log(doc.data())
-                setProfilePicture(doc.data().profilePicture)
-            })
-        })
-    }, [user,])
+    const {logoutUser} = useUserContext()
 
     return (
         <>
-            <TopTab navigation={navigation} profilePicture={profilePicture}/>
+            <TopTab navigation={navigation}/>
             <MenuTab selectedMenu={setMenuState}/>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {menuState === 0 ? (
                     <>
-                        <NewMissionCard data={data}/>
+                        <NewMissionCard data={data} navigation={navigation}/>
                     </>
                 ) : menuState === 1 ? (
                     <AvailableMissionCard />
                 ) : (
                     <MissionReportCard />
                 )}
+            <Button title={"Logout"} onPress={logoutUser}/>
             </ScrollView>
+            <BottomTab navigation={navigation} />
         </>
     )
 }
