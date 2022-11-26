@@ -1,21 +1,19 @@
-import {Button, SafeAreaView, ScrollView, Text} from "react-native";
+import {Button, ScrollView, StatusBar} from "react-native";
 import TopTab from "../components/TopTab";
 import {useUserContext} from "../context/userContext";
-import {useEffect, useState} from "react";
-import {db} from "../firebase";
-import {collection, getDocs, query, where} from "firebase/firestore"
+import {useState} from "react";
 import MenuTab from "../components/MenuTab";
 import NewMissionCard from "../components/MissionCards/NewMissionCard";
 import MissionReportCard from "../components/MissionCards/MissionReportCard";
 import AvailableMissionCard from "../components/MissionCards/AvailableMissionCard";
-import data from "../firebase/mission-data-sample"
-import Loading from "../components/Loading";
+import {newMissionData, availableMissionData, missionReportData} from "../firebase/mission-data-sample"
 import BottomTab from "../components/BottomTab";
 
 
 export default function Home({navigation}) {
     const [menuState, setMenuState] = useState(0);
     const {logoutUser} = useUserContext()
+
 
     return (
         <>
@@ -24,12 +22,23 @@ export default function Home({navigation}) {
             <ScrollView showsVerticalScrollIndicator={false}>
                 {menuState === 0 ? (
                     <>
-                        <NewMissionCard data={data} navigation={navigation}/>
+                        {newMissionData.map((missionData, index) => (
+                            <NewMissionCard data={missionData} navigation={navigation} key={index}/>
+                        ))}
                     </>
                 ) : menuState === 1 ? (
-                    <AvailableMissionCard />
+                    <>
+                        {availableMissionData.map((missionData, index) => (
+                            <AvailableMissionCard data={missionData} navigation={navigation} key={index}/>
+
+                        ))}
+                    </>
                 ) : (
-                    <MissionReportCard />
+                    <>
+                        {missionReportData.map((missionData, index) => (
+                            <MissionReportCard data={missionData} availableMissionData={availableMissionData} navigation={navigation} key={index}/>
+                        ))}
+                    </>
                 )}
             <Button title={"Logout"} onPress={logoutUser}/>
             </ScrollView>

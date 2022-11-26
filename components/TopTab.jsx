@@ -23,58 +23,61 @@ export default function TopTab({navigation}) {
     }, [user,])
 
     return (
-        <View style={styles.tab}>
-            <View style={styles.container}>
-                {navigation.canGoBack() ? (
-                    <View style={{flex: 1}}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <>
+            <StatusBar barStyle={"dark-content"}/>
+            <View style={styles.tab}>
+                <View style={styles.container}>
+                    {navigation.canGoBack() ? (
+                        <View style={{flex: 1}}>
+                            <TouchableOpacity onPress={() => navigation.goBack()}>
+                                <Image
+                                    source={arrow}
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                        marginLeft: 15,
+                                        resizeMode: "contain",
+                                        transform: [{rotateZ: "90deg"}]
+                                    }}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (<View style={{flex: 1}}></View>)}
+
+                    <Image
+                        source={feuille}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            flex: 5,
+                            resizeMode: "contain",
+                            transform: [{rotateZ: "20deg"}]
+                        }}
+                    />
+
+                    {user?.emailVerified ? (
+                        <TouchableOpacity style={{flex: 1}}>
                             <Image
-                                source={arrow}
+                                source={{uri: profilePicture}}
                                 style={{
-                                    width: 30,
-                                    height: 30,
-                                    marginLeft: 15,
-                                    resizeMode: "contain",
-                                    transform: [{rotateZ: "90deg"}]
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 100,
+                                    marginRight: 5,
+                                    resizeMode: "contain"
                                 }}
                             />
                         </TouchableOpacity>
-                    </View>
-                ) : (<View style={{flex: 1}}></View>)}
-
-                <Image
-                    source={feuille}
-                    style={{
-                        width: 40,
-                        height: 40,
-                        flex: 5,
-                        resizeMode: "contain",
-                        transform: [{rotateZ: "20deg"}]
-                    }}
-                />
-
-                {user?.emailVerified ? (
-                    <View style={{flex: 1}}>
-                        <Image
-                            source={{uri: profilePicture}}
-                            style={{
-                                width: 38,
-                                height: 38,
-                                borderRadius: 100,
-                                marginRight: 5,
-                                resizeMode: "contain"
-                            }}
-                        />
-                    </View>
-                    ) : (<View style={{flex: 1}}></View>)}
+                        ) : (<View style={{flex: 1}}></View>)}
+                </View>
             </View>
-        </View>
+        </>
     )
 }
 
 const styles = StyleSheet.create({
     tab: {
-        height: 80,
+        height: 75,
         backgroundColor: "white",
         borderBottomWidth: 0.5,
         borderBottomColor: "#959595",

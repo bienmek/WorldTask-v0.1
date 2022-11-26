@@ -31,7 +31,6 @@ export default function NewMissionCard({data, navigation}) {
         setHasVote(false)
         if (user) {
             data.votes.map((vote) => {
-                console.log(vote.voter)
                 if (vote.voter.includes(user.email)){
                     setHasVote(true)
                 }

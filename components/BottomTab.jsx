@@ -8,7 +8,7 @@ export default function BottomTab({navigation}) {
         <View
             style={{
                 backgroundColor: "white",
-                height: 60,
+                height: 55,
                 width: "100%",
                 borderTopWidth: 0.5,
                 borderColor: "#959595",
@@ -27,7 +27,7 @@ export default function BottomTab({navigation}) {
                 <TouchableOpacity style={{marginLeft: 10}} onPress={() => navigation.navigate("Home")}>
                     <Ionicons
                         name={"home"}
-                        size={35}
+                        size={30}
                         color={"black"}
                     />
                 </TouchableOpacity>
@@ -35,14 +35,14 @@ export default function BottomTab({navigation}) {
                 <TouchableOpacity style={{}}>
                     <Image
                         source={createTaskOutlined}
-                        style={{height: 35, width: 35}}
+                        style={{height: 30, width: 30}}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={{marginRight: 10}}>
                     <Ionicons
                         name={"notifications-outline"}
-                        size={35}
+                        size={30}
                         color={"black"}
                     />
                 </TouchableOpacity>

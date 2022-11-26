@@ -7,7 +7,7 @@ import Octicons from "react-native-vector-icons/Octicons";
 
 
 export default function CommentCard({comment, replyTo, hasChild}) {
-    const {getUserFromDb} = useUserContext()
+    const {getUserFromDb, user} = useUserContext()
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("");
     const [repliedAuthor, setRepliedAuthor] = useState("");

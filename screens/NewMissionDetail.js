@@ -1,6 +1,6 @@
 import TopTab from "../components/TopTab";
 import NewMissionDetailPart from "../components/MissionDetail/NewMissionDetailPart";
-import {ScrollView} from "react-native";
+import {SafeAreaView, ScrollView, StatusBar} from "react-native";
 import BottomTab from "../components/BottomTab";
 
 

@@ -2,7 +2,7 @@ import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from "@react-navigation/stack";
 import Landing from "./screens/Landing";
 import Login from "./screens/Login";
-import {UserContextProvider, useUserContext} from "./context/userContext";
+import {UserContextProvider} from "./context/userContext";
 import Register from "./screens/Register";
 import EmailVerification from "./screens/EmailVerification";
 import Home from "./screens/Home"
@@ -11,6 +11,8 @@ import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "./firebase";
 import Loading from "./components/Loading";
 import NewMissionDetail from "./screens/NewMissionDetail";
+import AvailableMissionDetail from "./screens/AvailableMissionDetail";
+import MissionReportDetail from "./screens/MissionReportDetail";
 
 const Stack = createStackNavigator()
 
@@ -44,6 +46,8 @@ export default function App() {
                     <Stack.Navigator initialRouteName={"Home"}>
                         <Stack.Screen name={"Home"} component={Home} options={{headerShown: false}}/>
                         <Stack.Screen name={"NewMissionDetail"} component={NewMissionDetail} options={{headerShown: false}}/>
+                        <Stack.Screen name={"AvailableMissionDetail"} component={AvailableMissionDetail} options={{headerShown: false}}/>
+                        <Stack.Screen name={"MissionReportDetail"} component={MissionReportDetail} options={{headerShown: false}}/>
                     </Stack.Navigator>
                 </UserContextProvider>
             </NavigationContainer>

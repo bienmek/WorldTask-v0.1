@@ -35,35 +35,38 @@ export default function CommentTab({comments}) {
         <View style={{marginTop: 25}}>
             {comments.map((comment, index) => {
                 const children = getCommentChildren(comment)
-                if (children.length > 0) {
-                    return (
-                        <>
-                            <View key={index} >
-                                <CommentCard comment={comment} replyTo={getTargetedComment(comment.reply_to)} />
-                                <View style={{backgroundColor: "white", justifyContent: "center", alignItems: "center"}}>
+                return (
+                    <View key={index}>
+                        {children.length > 0 ? (
+                            <>
+                                <CommentCard comment={comment} replyTo={getTargetedComment(comment.reply_to)}/>
+                                <View
+                                    style={{backgroundColor: "white", justifyContent: "center", alignItems: "center"}}>
                                     <AntDesign
                                         name={"arrowdown"}
                                         size={30}
                                         color={"black"}
                                     />
                                 </View>
-                            </View>
-                            {children.map((childComment, index2) => (
-                                    <CommentCard
-                                        comment={childComment}
-                                        key={index2}
-                                        replyTo={getTargetedComment(childComment.reply_to)}
-                                        hasChild={getCommentChildren(childComment)}
-                                    />
-                                )
-                            )}
-                        </>
-                    )
-                } else if (!comment.reply_to) {
-                    return (
-                        <CommentCard comment={comment} key={index}/>
-                    )
-                }
+                                {children.map((childComment, index) => (
+                                        <CommentCard
+                                            comment={childComment}
+                                            key={index}
+                                            replyTo={getTargetedComment(childComment.reply_to)}
+                                            hasChild={getCommentChildren(childComment)}
+                                        />
+                                    )
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                {!comment.reply_to && (
+                                    <CommentCard comment={comment} key={index}/>
+                                )}
+                            </>
+                        )}
+                    </View>
+                )
             })
             }
         </View>
