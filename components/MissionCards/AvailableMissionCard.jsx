@@ -7,7 +7,10 @@ import star2 from "../../assets/images/star_2.png";
 import star3 from "../../assets/images/star_3.png";
 import star4 from "../../assets/images/star_4.png";
 import star5 from "../../assets/images/star_5.png";
+import {useUserContext} from "../../context/userContext";
+
 export default function AvailableMissionCard({data, navigation}) {
+    const {user} = useUserContext()
 
     const chooseStar = (difficulty) => {
         switch(difficulty) {
@@ -29,7 +32,12 @@ export default function AvailableMissionCard({data, navigation}) {
     return (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("AvailableMissionDetail", {missionData: data, star: chooseStar(data.difficulty)})}
+            onPress={() =>
+                navigation.navigate("AvailableMissionDetail", {
+                    missionData: data,
+                    star: chooseStar(data.difficulty),
+                    readOnly: false
+                })}
             activeOpacity={0.7}
         >
             <View style={styles.header}>
@@ -68,19 +76,25 @@ export default function AvailableMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                <View
-                    style={{
-                        flex: 1,
-                        backgroundColor: "#25995C",
-                        height: 40,
-                        width: 20,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderRadius: 20
-                    }}
-                >
-                    <Text style={{color: "white", fontSize: 18, fontWeight: "bold"}}>Choisir la mission</Text>
-                </View>
+                {data.creator_uid !== user.uid ? (
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: "#25995C",
+                            height: 40,
+                            width: 20,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20
+                        }}
+                    >
+                        <Text style={{color: "white", fontSize: 18, fontWeight: "bold"}}>Choisir la mission</Text>
+                    </View>
+                ) : (
+                    <></>
+                )}
+
+
 
                 <View
                     style={{

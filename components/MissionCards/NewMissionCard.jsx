@@ -73,7 +73,7 @@ export default function NewMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {!hasVote ? (
+                {data.creator_uid !== user?.uid && !hasVote ? (
                     <View
                         style={{
                             flex: 1,

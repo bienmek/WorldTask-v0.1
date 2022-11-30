@@ -93,8 +93,9 @@ export default function MissionReportCard({data, navigation, availableMissionDat
                     <TouchableOpacity
                         onPress={() => navigation.navigate("AvailableMissionDetail", {
                             missionData: getMissionById(data.original_mission_uid),
-                            star: chooseStar(getMissionById(data.original_mission_uid).difficulty)}
-                        )}
+                            star: chooseStar(getMissionById(data.original_mission_uid).difficulty),
+                            readOnly: true
+                        })}
                     >
                         <Text style={styles.locationText}>Mission original</Text>
                     </TouchableOpacity>
@@ -161,7 +162,7 @@ export default function MissionReportCard({data, navigation, availableMissionDat
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {!hasVote ? (
+                {data.reporter === !user?.uid && !hasVote ? (
                     <View
                         style={{
                             flex: 1,

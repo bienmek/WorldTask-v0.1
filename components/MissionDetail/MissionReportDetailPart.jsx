@@ -16,7 +16,7 @@ import star5 from "../../assets/images/star_5.png";
 export default function MissionReportDetailPart({missionData, hasVote, navigation}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("");
-    const {getUserFromDb} = useUserContext()
+    const {getUserFromDb, user} = useUserContext()
 
     const getMissionById = (uid) => {
         let returnedMission
@@ -73,7 +73,9 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                     <TouchableOpacity
                         onPress={() => navigation.navigate("AvailableMissionDetail", {
                             missionData: getMissionById(missionData.original_mission_uid),
-                            star: chooseStar(getMissionById(missionData.original_mission_uid).difficulty)}
+                            star: chooseStar(getMissionById(missionData.original_mission_uid).difficulty),
+                            readOnly: true
+                        }
                         )}
                     >
                         <Text style={styles.locationText}>Mission original</Text>
@@ -198,7 +200,7 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.comments.length}</Text>
                 </View>
 
-                {!hasVote ? (
+                {missionData.reporter === user?.uid ? (
                     <TouchableOpacity
                         style={{
                             flex: 2,
@@ -209,6 +211,21 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                             alignItems: "center",
                             borderRadius: 20
                         }}
+                    >
+                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Modifier</Text>
+                    </TouchableOpacity>
+                ) : !hasVote ? (
+                    <TouchableOpacity
+                        style={{
+                            flex: 2,
+                            backgroundColor: "#25995C",
+                            height: 40,
+                            width: 30,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20
+                        }}
+                        onPress={() => navigation.navigate("MissionReportVotePage", {mission: missionData})}
                     >
                         <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Voter</Text>
                     </TouchableOpacity>

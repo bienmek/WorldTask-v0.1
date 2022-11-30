@@ -5,13 +5,13 @@ import AvailableMissionDetailPart from "../components/MissionDetail/AvailableMis
 
 
 export default function AvailableMissionDetail({route, navigation}) {
-    const {missionData, star} = route.params
+    const {missionData, star, readOnly} = route.params
 
     return (
         <>
             <TopTab navigation={navigation}/>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <AvailableMissionDetailPart missionData={missionData} star={star}/>
+                <AvailableMissionDetailPart missionData={missionData} star={star} readOnly={readOnly}/>
             </ScrollView>
             <BottomTab navigation={navigation} />
         </>

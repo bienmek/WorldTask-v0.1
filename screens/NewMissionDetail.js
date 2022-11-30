@@ -11,7 +11,7 @@ export default function NewMissionDetail({route, navigation}) {
         <>
             <TopTab navigation={navigation}/>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <NewMissionDetailPart missionData={missionData} hasVote={hasVote}/>
+                <NewMissionDetailPart missionData={missionData} hasVote={hasVote} navigation={navigation}/>
             </ScrollView>
             <BottomTab navigation={navigation} />
         </>

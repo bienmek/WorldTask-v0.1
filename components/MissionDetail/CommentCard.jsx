@@ -90,7 +90,7 @@ export default function CommentCard({comment, replyTo, hasChild}) {
                         }}
                     >
                         <Text style={{color: "#959595", fontSize: 15}}>En réponse à</Text>
-                        <TouchableOpacity>
+                        <View>
                             <Text
                                 style={{
                                     color: "#0066ff",
@@ -102,7 +102,7 @@ export default function CommentCard({comment, replyTo, hasChild}) {
                             >
                                 @{repliedAuthor}
                             </Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
                 )}
                 <View

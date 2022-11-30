@@ -7,9 +7,9 @@ import {useUserContext} from "../../context/userContext";
 import CommentTab from "./CommentTab";
 import star5 from "../../assets/images/star_5.png"
 
-export default function AvailableMissionDetailPart({missionData, star}) {
+export default function AvailableMissionDetailPart({missionData, star, readOnly}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
-    const {getUserFromDb} = useUserContext()
+    const {getUserFromDb, user} = useUserContext()
     const REWARD = 120
 
     useEffect(() => {
@@ -124,19 +124,25 @@ export default function AvailableMissionDetailPart({missionData, star}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.comments.length}</Text>
                 </View>
 
-                <TouchableOpacity
-                    style={{
-                        flex: 2,
-                        backgroundColor: "#25995C",
-                        height: 40,
-                        width: 30,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderRadius: 20
-                    }}
-                >
-                    <Text style={{color: "white", fontWeight: "bold", fontSize: 20}}>Choisir la mission</Text>
-                </TouchableOpacity>
+                {missionData.creator_uid !== user.uid && !readOnly ? (
+                    <TouchableOpacity
+                        style={{
+                            flex: 2,
+                            backgroundColor: "#25995C",
+                            height: 40,
+                            width: 30,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20
+                        }}
+                    >
+                        <Text style={{color: "white", fontWeight: "bold", fontSize: 20}}>Choisir la mission</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <></>
+                )}
+
+
 
                 <View
                     style={{
@@ -154,14 +160,17 @@ export default function AvailableMissionDetailPart({missionData, star}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.shares.length}</Text>
                 </View>
             </View>
-            <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 20}}>
-                <Text style={{fontSize: 15, color: "#565656FF"}}>Estimation de la récompense: </Text>
-                <Text style={{fontSize: 18, color: "#565656FF", fontWeight: "bold"}}>~{REWARD}</Text>
-                <Image
-                    source={star5}
-                    style={{width: 25, height: 25}}
-                />
-            </View>
+
+            {missionData.creator_uid !== user.uid && (
+                <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 20}}>
+                    <Text style={{fontSize: 15, color: "#565656FF"}}>Estimation de la récompense: </Text>
+                    <Text style={{fontSize: 18, color: "#565656FF", fontWeight: "bold"}}>~{REWARD}</Text>
+                    <Image
+                        source={star5}
+                        style={{width: 25, height: 25}}
+                    />
+                </View>
+            )}
             <CommentTab comments={missionData.comments} />
         </View>
     )

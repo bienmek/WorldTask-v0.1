@@ -13,6 +13,8 @@ import Loading from "./components/Loading";
 import NewMissionDetail from "./screens/NewMissionDetail";
 import AvailableMissionDetail from "./screens/AvailableMissionDetail";
 import MissionReportDetail from "./screens/MissionReportDetail";
+import NewMissionVotePage from "./screens/NewMissionVotePage";
+import MissionReportVotePage from "./screens/MissionReportVotePage";
 
 const Stack = createStackNavigator()
 
@@ -48,6 +50,8 @@ export default function App() {
                         <Stack.Screen name={"NewMissionDetail"} component={NewMissionDetail} options={{headerShown: false}}/>
                         <Stack.Screen name={"AvailableMissionDetail"} component={AvailableMissionDetail} options={{headerShown: false}}/>
                         <Stack.Screen name={"MissionReportDetail"} component={MissionReportDetail} options={{headerShown: false}}/>
+                        <Stack.Screen name={"NewMissionVotePage"} component={NewMissionVotePage} options={{headerShown: false}}/>
+                        <Stack.Screen name={"MissionReportVotePage"} component={MissionReportVotePage} options={{headerShown: false}}/>
                     </Stack.Navigator>
                 </UserContextProvider>
             </NavigationContainer>

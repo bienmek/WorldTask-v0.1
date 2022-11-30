@@ -7,9 +7,9 @@ import {useUserContext} from "../../context/userContext";
 import CommentTab from "./CommentTab";
 
 
-export default function NewMissionDetailPart({missionData, hasVote}) {
+export default function NewMissionDetailPart({missionData, hasVote, navigation}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
-    const {getUserFromDb} = useUserContext()
+    const {getUserFromDb, user} = useUserContext()
 
     useEffect(() => {
         if (missionData?.creator_uid) {
@@ -114,7 +114,7 @@ export default function NewMissionDetailPart({missionData, hasVote}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.comments.length}</Text>
                 </View>
 
-                {!hasVote ? (
+                {missionData.creator_uid === user?.uid ? (
                     <TouchableOpacity
                         style={{
                             flex: 2,
@@ -125,6 +125,21 @@ export default function NewMissionDetailPart({missionData, hasVote}) {
                             alignItems: "center",
                             borderRadius: 20
                         }}
+                    >
+                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Modifier</Text>
+                    </TouchableOpacity>
+                ) : !hasVote ? (
+                    <TouchableOpacity
+                        style={{
+                            flex: 2,
+                            backgroundColor: "#25995C",
+                            height: 40,
+                            width: 30,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20
+                        }}
+                        onPress={() => navigation.navigate("NewMissionVotePage", {mission: missionData})}
                     >
                         <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Voter</Text>
                     </TouchableOpacity>
