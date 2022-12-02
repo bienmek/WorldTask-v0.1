@@ -5,7 +5,6 @@ import star5 from "../assets/images/star_5.png"
 import profile from "../assets/images/profile.png"
 import friends from "../assets/images/friends.png"
 import map from "../assets/images/map.png"
-import search from "../assets/images/search.png"
 import reward from "../assets/images/reward.png"
 import ranking from "../assets/images/ranking.png"
 import about from "../assets/images/about.png"
@@ -16,6 +15,7 @@ export default function SideMenu({displayMenu, navigation}) {
     const {user, profilePicture, getUserFromDb, username, logoutUser} = useUserContext()
     const [star, setStar] = useState(0);
     const [sanitizedUsername, setSanitizedUsername] = useState(username);
+    const [isSanitized, setIsSanitized] = useState(false);
     const usernameRef = useRef(null);
     const SCREEN_WIDTH = Dimensions.get('window').width
 
@@ -34,6 +34,7 @@ export default function SideMenu({displayMenu, navigation}) {
         const width = event.nativeEvent.layout.width
         const threshold = SCREEN_WIDTH/2.34
         if (width > threshold) {
+            setIsSanitized(true)
             const nb = Math.round((width-threshold)/15)
             const sub = sanitizedUsername.substring(0, sanitizedUsername.length - (nb+1))
             setSanitizedUsername(sub)
@@ -88,14 +89,14 @@ export default function SideMenu({displayMenu, navigation}) {
                                 ref={usernameRef}
                                 onLayout={(event) => dynamicTextSanitizer(event, 160)}
                             >
-                                @{sanitizedUsername.toString()}
+                                @{isSanitized ? sanitizedUsername.toString()+"..." : sanitizedUsername.toString()}
                             </Text>
                         </View>
 
                         <View
                             style={{
-                                height: 30,
-                                width: 70,
+                                height: 25,
+                                width: 65,
                                 flexDirection: "row",
                                 justifyContent: "space-between",
                                 alignItems: "center",
@@ -121,8 +122,7 @@ export default function SideMenu({displayMenu, navigation}) {
                             <Text
                                 style={{
                                     color: "black",
-                                    fontSize: 15,
-                                    fontWeight: "bold",
+                                    fontSize: 13,
                                     marginRight: 3
                                 }}
                             >
@@ -136,7 +136,7 @@ export default function SideMenu({displayMenu, navigation}) {
                         </Text>
 
                         <Text style={{fontSize: 15}}>
-                            <Text style={{color: "#959595", fontWeight: "bold"}}>0</Text> Missions effectuées
+                            <Text style={{color: "#959595", fontWeight: "bold"}}>0</Text> Tasks effectuées
                         </Text>
                     </View>
                 </View>
@@ -144,7 +144,8 @@ export default function SideMenu({displayMenu, navigation}) {
 
                     <TouchableOpacity
                         onPress={() => {
-                            navigation.navigate("Profile")
+                            navigation.navigate("Profile", {routeUser: user?.uid})
+                            displayMenu(false)
                         }}
                     >
                         <MenuItem title={"Profil"} icon={profile} color={"black"}/>

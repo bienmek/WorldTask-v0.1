@@ -70,7 +70,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
             </Text>
 
             <View style={styles.bottomInfos}>
-                <View style={styles.userInfos}>
+                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData?.creator_uid})}>
                     <Image
                         source={{uri: profilePicture}}
                         style={{
@@ -91,7 +91,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                     >
                         @{missionData.creator_username}
                     </Text>
-                </View>
+                </TouchableOpacity>
                 <Text
                     style={{
                         color: "#959595",
@@ -182,7 +182,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.shares.length}</Text>
                 </View>
             </View>
-            <CommentTab comments={missionData.comments} />
+            <CommentTab comments={missionData.comments} navigation={navigation}/>
         </View>
     )
 }

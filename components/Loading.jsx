@@ -17,8 +17,12 @@ export default function Loading() {
             style={{
                 justifyContent: "center",
                 alignItems: "center",
-                flex: 1,
-                flexDirection: "row"
+                flexDirection: "row",
+                position: "absolute",
+                height: "100%",
+                width: "100%",
+                zIndex: 99,
+                backgroundColor: "white"
             }}
         >
             <Text

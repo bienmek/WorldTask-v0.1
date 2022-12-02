@@ -6,7 +6,7 @@ import {db} from "../../firebase";
 import Octicons from "react-native-vector-icons/Octicons";
 
 
-export default function CommentCard({comment, replyTo, hasChild}) {
+export default function CommentCard({comment, replyTo, hasChild, navigation}) {
     const {getUserFromDb, user} = useUserContext()
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("");
@@ -48,7 +48,7 @@ export default function CommentCard({comment, replyTo, hasChild}) {
             <View style={styles.commentContainer}>
 
                 <View style={styles.header}>
-                    <View style={styles.userInfos}>
+                    <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: comment?.author})}>
                         <Image
                             source={{uri: profilePicture}}
                             style={{
@@ -60,7 +60,7 @@ export default function CommentCard({comment, replyTo, hasChild}) {
                             }}
                         />
 
-                        <TouchableOpacity>
+                        <View>
                             <Text
                                 style={{
                                     color: "#25995C",
@@ -71,8 +71,8 @@ export default function CommentCard({comment, replyTo, hasChild}) {
                             >
                                 @{username}
                             </Text>
-                        </TouchableOpacity>
-                    </View>
+                        </View>
+                    </TouchableOpacity>
 
                     <TouchableOpacity style={{marginRight: 6}}>
                         <Octicons

@@ -80,7 +80,7 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
             </Text>
 
             <View style={styles.bottomInfos}>
-                <View style={styles.userInfos}>
+                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData?.creator_uid})}>
                     <Image
                         source={{uri: profilePicture}}
                         style={{
@@ -101,7 +101,7 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                     >
                         @{missionData.creator_username}
                     </Text>
-                </View>
+                </TouchableOpacity>
                 <Text
                     style={{
                         color: "#959595",
@@ -175,7 +175,7 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                     />
                 </View>
             )}
-            <CommentTab comments={missionData.comments} />
+            <CommentTab comments={missionData.comments} navigation={navigation}/>
         </View>
     )
 }

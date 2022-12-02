@@ -11,6 +11,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autorisez vous World Task à acceder à vos photos ?"
+        }
+      ]
+    ],
     "updates": {
       "fallbackToCacheTimeout": 0
     },

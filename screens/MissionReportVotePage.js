@@ -39,7 +39,7 @@ export default function MissionReportVotePage({route, navigation}) {
                             fontSize: 22,
                             color: "black"
                         }}>
-                        La mission est elle pertinente ?
+                        La mission est elle réussie ?
                     </Text>
 
                     <TouchableOpacity

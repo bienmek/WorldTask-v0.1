@@ -4,7 +4,7 @@ import {useState} from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
 
-export default function CommentTab({comments}) {
+export default function CommentTab({comments, navigation}) {
 
     const getTargetedComment = (commentId) => {
         let returnedComment
@@ -39,7 +39,7 @@ export default function CommentTab({comments}) {
                     <View key={index}>
                         {children.length > 0 ? (
                             <>
-                                <CommentCard comment={comment} replyTo={getTargetedComment(comment.reply_to)}/>
+                                <CommentCard comment={comment} replyTo={getTargetedComment(comment.reply_to)} navigation={navigation}/>
                                 <View
                                     style={{backgroundColor: "white", justifyContent: "center", alignItems: "center"}}>
                                     <AntDesign
@@ -54,6 +54,7 @@ export default function CommentTab({comments}) {
                                             key={index}
                                             replyTo={getTargetedComment(childComment.reply_to)}
                                             hasChild={getCommentChildren(childComment)}
+                                            navigation={navigation}
                                         />
                                     )
                                 )}
@@ -61,7 +62,7 @@ export default function CommentTab({comments}) {
                         ) : (
                             <>
                                 {!comment.reply_to && (
-                                    <CommentCard comment={comment} key={index}/>
+                                    <CommentCard comment={comment} key={index} navigation={navigation}/>
                                 )}
                             </>
                         )}

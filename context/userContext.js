@@ -18,10 +18,11 @@ export const useUserContext = () => useContext(UserContext)
 
 export const UserContextProvider = ({children}) => {
     const [user, setUser] = useState(null);
-    const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
+    const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile_picture%2Fblank_pp.png?alt=media&token=0c6a438a-6dcf-4491-94d5-c1ee187e6c08");
     const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(false);
     const [errorContext, setErrorContext] = useState("");
+    const [updateContext, setUpdateContext] = useState(0);
 
     useEffect(() => {
         setLoading(true);
@@ -40,7 +41,7 @@ export const UserContextProvider = ({children}) => {
             setErrorContext("")
             setLoading(false);
         });
-    }, []);
+    }, [updateContext]);
 
 
     const registerUser = (email, password) => {
@@ -90,6 +91,12 @@ export const UserContextProvider = ({children}) => {
         return await getDocs(q)
     }
 
+    const getUserByUsername = async (username) => {
+        const taskers = collection(db, "taskers")
+        const q = query(taskers, where("username", "==", username))
+        return await getDocs(q)
+    }
+
 
     const contextValue = {
         user,
@@ -98,12 +105,15 @@ export const UserContextProvider = ({children}) => {
         setLoading,
         username,
         profilePicture,
+        setUpdateContext,
+        updateContext,
         getUserFromDb,
         registerUser,
         loginUser,
         logoutUser,
         forgotPassword,
-        sendEmail
+        sendEmail,
+        getUserByUsername
     }
 
     return (
