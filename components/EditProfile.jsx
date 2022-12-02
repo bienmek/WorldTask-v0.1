@@ -43,6 +43,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
         setUploading(true)
 
         const pfpRef = doc(db, "taskers", user?.uid);
+        const regex = /^[a-z\d]+$/i
 
         if (image) {
             const storageRef = ref(storage, `profile_picture/${image.fileName}`);
@@ -76,31 +77,36 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
 
         if (changedUsername) {
             if (changedUsername.length > 4 && changedUsername.length < 16) {
-                if(changedUsername !== username) {
-                    getUserByUsername(changedUsername).then((res) => {
-                        if (!res.empty) {
-                            setUploading(false)
-                            setError("Erreur: le nom est déjà pris par un autre tasker")
-                        } else {
-                            updateDoc(pfpRef, {username: changedUsername})
-                                .then(() => {
-                                    if (!image) {
-                                        setUploading(false)
-                                        setUpdateContext(updateContext+1)
-                                        updatePage(1)
-                                        displayEditProfile(false)
-                                    }
-                                })
-                                .catch((error) => console.error(error))
-                            setError("")
-                        }
-                    })
+                if (regex.test(changedUsername)) {
+                    if(changedUsername !== username) {
+                        getUserByUsername(changedUsername).then((res) => {
+                            if (!res.empty) {
+                                setUploading(false)
+                                setError("Erreur: le nom est déjà pris par un autre tasker")
+                            } else {
+                                updateDoc(pfpRef, {username: changedUsername})
+                                    .then(() => {
+                                        if (!image) {
+                                            setUploading(false)
+                                            setUpdateContext(updateContext+1)
+                                            updatePage(1)
+                                            displayEditProfile(false)
+                                        }
+                                    })
+                                    .catch((error) => console.error(error))
+                                setError("")
+                            }
+                        })
+                    } else {
+                        displayEditProfile(false)
+                    }
                 } else {
-                    displayEditProfile(false)
+                    setUploading(false)
+                    setError("Erreur: le nom est invalide")
                 }
             } else {
                 setUploading(false)
-                setError("Erreur: le nom doit être compris entre 5 et 15 caractères maximum)")
+                setError("Erreur: le nom doit être compris entre 5 et 15 caractères maximum")
             }
         } else if (!image) {
             setUploading(false)
