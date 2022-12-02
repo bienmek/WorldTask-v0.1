@@ -15,6 +15,8 @@ import AvailableMissionDetail from "./screens/AvailableMissionDetail";
 import MissionReportDetail from "./screens/MissionReportDetail";
 import NewMissionVotePage from "./screens/NewMissionVotePage";
 import MissionReportVotePage from "./screens/MissionReportVotePage";
+import ImageViewer from "./screens/ImageViewer";
+import Profile from "./screens/Profile";
 
 const Stack = createStackNavigator()
 
@@ -52,6 +54,8 @@ export default function App() {
                         <Stack.Screen name={"MissionReportDetail"} component={MissionReportDetail} options={{headerShown: false}}/>
                         <Stack.Screen name={"NewMissionVotePage"} component={NewMissionVotePage} options={{headerShown: false}}/>
                         <Stack.Screen name={"MissionReportVotePage"} component={MissionReportVotePage} options={{headerShown: false}}/>
+                        <Stack.Screen name={"ImageViewer"} component={ImageViewer} options={{headerShown: false}}/>
+                        <Stack.Screen name={"Profile"} component={Profile} options={{headerShown: false}}/>
                     </Stack.Navigator>
                 </UserContextProvider>
             </NavigationContainer>

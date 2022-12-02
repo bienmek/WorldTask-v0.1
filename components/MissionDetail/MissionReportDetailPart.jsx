@@ -106,6 +106,7 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                 imageHeight={250}
                 imageMarginTop={20}
                 imageIndexMarginTop={90}
+                navigation={navigation}
             />
 
             <View
@@ -132,6 +133,7 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                 imageHeight={250}
                 imageMarginTop={5}
                 imageIndexMarginTop={345}
+                navigation={navigation}
             />
 
             <Text

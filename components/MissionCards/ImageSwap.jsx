@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Loading from "../Loading";
 
-export default function ImageSwap({images, imageHeight, imageMarginTop, imageIndexMarginTop}) {
+export default function ImageSwap({images, imageHeight, imageMarginTop, imageIndexMarginTop, navigation}) {
     const scroll = useRef(null);
     const [imageNumber, setImageNumber] = useState(1);
     const [previousScroll, setPreviousScroll] = useState(0);
@@ -54,7 +54,11 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
                 }}
             >
                 {images.map((image, index) => (
-                    <View key={index}>
+                    <TouchableOpacity
+                        key={index}
+                        activeOpacity={1}
+                        onPress={() => navigation.navigate("ImageViewer", {routeImage: image})}
+                    >
                         {loading && (
                             <View>
                                 <Text>Loading...</Text>
@@ -69,7 +73,7 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
                             }}
                             onLoadEnd={() => setLoading(false)}
                         />
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </>

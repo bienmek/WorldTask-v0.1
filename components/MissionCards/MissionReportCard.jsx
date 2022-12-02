@@ -124,6 +124,7 @@ export default function MissionReportCard({data, navigation, availableMissionDat
                 imageHeight={250}
                 imageMarginTop={10}
                 imageIndexMarginTop={80}
+                navigation={navigation}
             />
 
             <View
@@ -150,6 +151,7 @@ export default function MissionReportCard({data, navigation, availableMissionDat
                 imageHeight={250}
                 imageMarginTop={0}
                 imageIndexMarginTop={340}
+                navigation={navigation}
             />
 
             <View style={styles.bottomSide}>
@@ -162,7 +164,7 @@ export default function MissionReportCard({data, navigation, availableMissionDat
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {data.reporter === !user?.uid && !hasVote ? (
+                {data.reporter !== user?.uid && !hasVote ? (
                     <View
                         style={{
                             flex: 1,

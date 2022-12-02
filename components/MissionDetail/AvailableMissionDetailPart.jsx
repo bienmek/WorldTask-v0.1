@@ -7,7 +7,7 @@ import {useUserContext} from "../../context/userContext";
 import CommentTab from "./CommentTab";
 import star5 from "../../assets/images/star_5.png"
 
-export default function AvailableMissionDetailPart({missionData, star, readOnly}) {
+export default function AvailableMissionDetailPart({missionData, star, readOnly, navigation}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const {getUserFromDb, user} = useUserContext()
     const REWARD = 120
@@ -56,7 +56,13 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly}
 
             </View>
 
-            <ImageSwap images={missionData.images} imageHeight={300} imageMarginTop={20} imageIndexMarginTop={100}/>
+            <ImageSwap
+                images={missionData.images}
+                imageHeight={300}
+                imageMarginTop={20}
+                imageIndexMarginTop={100}
+                navigation={navigation}
+            />
 
             <Text
                 style={{
@@ -142,8 +148,6 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly}
                     <></>
                 )}
 
-
-
                 <View
                     style={{
                         flexDirection: "row",
@@ -161,7 +165,7 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly}
                 </View>
             </View>
 
-            {missionData.creator_uid !== user.uid && (
+            {(missionData.creator_uid !== user?.uid && !readOnly) && (
                 <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 20}}>
                     <Text style={{fontSize: 15, color: "#565656FF"}}>Estimation de la récompense: </Text>
                     <Text style={{fontSize: 18, color: "#565656FF", fontWeight: "bold"}}>~{REWARD}</Text>

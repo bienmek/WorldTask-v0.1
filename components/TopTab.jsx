@@ -6,21 +6,8 @@ import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
 import {useEffect, useState} from "react";
 
-export default function TopTab({navigation}) {
-    const {user, getUserFromDb} = useUserContext()
-    const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
-
-
-    useEffect(() => {
-        if (user?.uid) {
-            getUserFromDb(user.uid).then((res) => {
-                res?.forEach((doc) => {
-                    console.log(doc.data())
-                    setProfilePicture(doc.data().profilePicture)
-                })
-            })
-        }
-    }, [user,])
+export default function TopTab({navigation, displayMenu}) {
+    const {user, profilePicture} = useUserContext()
 
     return (
         <>
@@ -56,7 +43,10 @@ export default function TopTab({navigation}) {
                     />
 
                     {user?.emailVerified ? (
-                        <TouchableOpacity style={{flex: 1}}>
+                        <TouchableOpacity
+                            style={{flex: 1}}
+                            onPress={() => displayMenu(true)}
+                        >
                             <Image
                                 source={{uri: profilePicture}}
                                 style={{

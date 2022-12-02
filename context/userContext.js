@@ -18,6 +18,8 @@ export const useUserContext = () => useContext(UserContext)
 
 export const UserContextProvider = ({children}) => {
     const [user, setUser] = useState(null);
+    const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
+    const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(false);
     const [errorContext, setErrorContext] = useState("");
 
@@ -26,6 +28,12 @@ export const UserContextProvider = ({children}) => {
         return onAuthStateChanged(auth, (res) => {
             if (res) {
                 setUser(res);
+                getUserFromDb(res?.uid).then((res) => {
+                    res?.forEach((doc) => {
+                        setProfilePicture(doc.data().profilePicture)
+                        setUsername(doc.data().username)
+                    })
+                })
             } else {
                 setUser(null);
             }
@@ -88,6 +96,8 @@ export const UserContextProvider = ({children}) => {
         loading,
         errorContext,
         setLoading,
+        username,
+        profilePicture,
         getUserFromDb,
         registerUser,
         loginUser,

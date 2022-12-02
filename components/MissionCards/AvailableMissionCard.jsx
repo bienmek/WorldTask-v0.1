@@ -64,7 +64,13 @@ export default function AvailableMissionCard({data, navigation}) {
                 </View>
 
             </View>
-            <ImageSwap images={data.images} imageHeight={300} imageMarginTop={10} imageIndexMarginTop={80}/>
+            <ImageSwap
+                images={data.images}
+                imageHeight={300}
+                imageMarginTop={10}
+                imageIndexMarginTop={80}
+                navigation={navigation}
+            />
 
             <View style={styles.bottomSide}>
                 <View style={styles.commentBubble}>
@@ -76,7 +82,7 @@ export default function AvailableMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {data.creator_uid !== user.uid ? (
+                {data.creator_uid !== user?.uid ? (
                     <View
                         style={{
                             flex: 1,

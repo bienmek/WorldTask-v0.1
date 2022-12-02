@@ -61,7 +61,13 @@ export default function NewMissionCard({data, navigation}) {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ImageSwap images={data.images} imageHeight={300} imageMarginTop={10} imageIndexMarginTop={80}/>
+            <ImageSwap
+                images={data.images}
+                imageHeight={300}
+                imageMarginTop={10}
+                imageIndexMarginTop={80}
+                navigation={navigation}
+            />
 
             <View style={styles.bottomSide}>
                 <View style={styles.commentBubble}>

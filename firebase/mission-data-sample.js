@@ -221,7 +221,7 @@ export const missionReportData = [
                 mission_relevance: false
             },
             {
-                voter: "ukrltranslate@gmail.com",
+                voter: "xxxxxxxxxxxxxxxxxxxxxxxx",
                 mission_relevance: true
             },
         ],

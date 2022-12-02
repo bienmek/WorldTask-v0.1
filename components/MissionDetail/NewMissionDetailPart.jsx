@@ -46,7 +46,13 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                 </View>
             </View>
 
-            <ImageSwap images={missionData.images} imageHeight={300} imageMarginTop={20} imageIndexMarginTop={100}/>
+            <ImageSwap
+                images={missionData.images}
+                imageHeight={300}
+                imageMarginTop={20}
+                imageIndexMarginTop={100}
+                navigation={navigation}
+            />
 
             <Text
                 style={{
