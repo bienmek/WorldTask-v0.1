@@ -41,7 +41,12 @@ export default function CommentTab({comments, navigation}) {
                             <>
                                 <CommentCard comment={comment} replyTo={getTargetedComment(comment.reply_to)} navigation={navigation}/>
                                 <View
-                                    style={{backgroundColor: "white", justifyContent: "center", alignItems: "center"}}>
+                                    style={{
+                                        backgroundColor: "white",
+                                        justifyContent: "center",
+                                        alignItems: "center"
+                                    }}
+                                >
                                     <AntDesign
                                         name={"arrowdown"}
                                         size={30}

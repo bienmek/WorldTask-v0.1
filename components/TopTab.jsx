@@ -5,16 +5,19 @@ import {useUserContext} from "../context/userContext";
 import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
 import {useEffect, useState} from "react";
+import {useRoute} from "@react-navigation/native";
 
 export default function TopTab({navigation, displayMenu}) {
     const {user, profilePicture} = useUserContext()
+
+    const route = useRoute()
 
     return (
         <>
             <StatusBar barStyle={"dark-content"}/>
             <View style={styles.tab}>
                 <View style={styles.container}>
-                    {navigation.canGoBack() ? (
+                    {(navigation.canGoBack() && route.name !== "MakeAnAction" && route.name !== "Notifications" && route.name !== "Home") ? (
                         <View style={{flex: 1}}>
                             <TouchableOpacity onPress={() => navigation.goBack()}>
                                 <Image

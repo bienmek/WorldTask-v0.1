@@ -35,7 +35,6 @@ export default function MissionReportVotePage({route, navigation}) {
                 >
                     <Text
                         style={{
-                            fontWeight: "bold",
                             fontSize: 22,
                             color: "black"
                         }}>
@@ -55,7 +54,7 @@ export default function MissionReportVotePage({route, navigation}) {
                         onPress={() => setMissionRelevance("1")}
                         activeOpacity={0.7}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>oui</Text>
+                        <Text style={{color: "white", fontSize: 18}}>oui</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -71,7 +70,7 @@ export default function MissionReportVotePage({route, navigation}) {
                         onPress={() => setMissionRelevance("2")}
                         activeOpacity={0.7}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>non</Text>
+                        <Text style={{color: "white", fontSize: 18}}>non</Text>
                     </TouchableOpacity>
                 </View>
 

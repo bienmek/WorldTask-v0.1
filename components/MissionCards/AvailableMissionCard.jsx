@@ -8,9 +8,12 @@ import star3 from "../../assets/images/star_3.png";
 import star4 from "../../assets/images/star_4.png";
 import star5 from "../../assets/images/star_5.png";
 import {useUserContext} from "../../context/userContext";
+import {useEffect, useState} from "react";
 
 export default function AvailableMissionCard({data, navigation}) {
-    const {user} = useUserContext()
+    const {user, getUserFromDb} = useUserContext()
+
+    const [username, setUsername] = useState("------");
 
     const chooseStar = (difficulty) => {
         switch(difficulty) {
@@ -29,6 +32,17 @@ export default function AvailableMissionCard({data, navigation}) {
         }
     }
 
+    useEffect(() => {
+        if (data?.creator_uid) {
+            getUserFromDb(data?.creator_uid).then((res) => {
+                res?.forEach((doc) => {
+                    const user = doc.data()
+                    setUsername(user.username)
+                })
+            })
+        }
+    }, [data,])
+
     return (
         <TouchableOpacity
             style={styles.card}
@@ -43,7 +57,7 @@ export default function AvailableMissionCard({data, navigation}) {
             <View style={styles.header}>
                 <View style={styles.upSide}>
                     <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>@{data.creator_username} · {data.created_at} mins</Text>
+                    <Text style={styles.sideText}>@{username} · {data.created_at} mins</Text>
                 </View>
                 <View style={styles.downSide}>
                     <Ionicons
@@ -82,25 +96,19 @@ export default function AvailableMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {data.creator_uid !== user?.uid ? (
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: "#25995C",
-                            height: 40,
-                            width: 20,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            borderRadius: 20
-                        }}
-                    >
-                        <Text style={{color: "white", fontSize: 18, fontWeight: "bold"}}>Choisir la mission</Text>
-                    </View>
-                ) : (
-                    <></>
-                )}
-
-
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: "#25995C",
+                        height: 40,
+                        width: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: 20
+                    }}
+                >
+                    <Text style={{color: "white", fontSize: 18}}>Choisir la mission</Text>
+                </View>
 
                 <View
                     style={{
@@ -158,7 +166,6 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontWeight: "bold",
         fontSize: 13,
         marginLeft: 3,
         textDecorationLine: "underline"

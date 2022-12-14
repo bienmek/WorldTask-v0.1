@@ -9,6 +9,7 @@ import CommentTab from "./CommentTab";
 
 export default function NewMissionDetailPart({missionData, hasVote, navigation}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
+    const [username, setUsername] = useState("------");
     const {getUserFromDb, user} = useUserContext()
 
     useEffect(() => {
@@ -17,6 +18,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                 res?.forEach((doc) => {
                     console.log(doc.data())
                     setProfilePicture(doc.data().profilePicture)
+                    setUsername(doc.data().username)
                 })
             })
         }
@@ -89,7 +91,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                             marginLeft: 3
                         }}
                     >
-                        @{missionData.creator_username}
+                        @{username}
                     </Text>
                 </TouchableOpacity>
                 <Text
@@ -132,7 +134,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                             borderRadius: 20
                         }}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Modifier</Text>
+                        <Text style={{color: "white", fontSize: 22}}>Modifier</Text>
                     </TouchableOpacity>
                 ) : !hasVote ? (
                     <TouchableOpacity
@@ -147,7 +149,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         }}
                         onPress={() => navigation.navigate("NewMissionVotePage", {mission: missionData})}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Voter</Text>
+                        <Text style={{color: "white", fontSize: 22}}>Voter</Text>
                     </TouchableOpacity>
                 ) : (
                     <View
@@ -161,7 +163,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                             borderRadius: 20
                         }}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Vous avez voté</Text>
+                        <Text style={{color: "white", fontSize: 22}}>Vous avez voté</Text>
                     </View>
 
                 )}
@@ -204,7 +206,6 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontWeight: "bold",
         fontSize: 18,
         marginLeft: 3,
         textDecorationLine: "underline"

@@ -15,11 +15,6 @@ export default function Home({navigation}) {
     const [menuState, setMenuState] = useState(0);
     const [displayMenu, setDisplayMenu] = useState(false);
 
-    useEffect(() => {
-        setDisplayMenu(false)
-    }, []);
-
-
     return (
         <>
             {displayMenu && (

@@ -101,17 +101,19 @@ export default function Profile({route, navigation}) {
                 <View style={styles.userInfo}>
                     <View style={styles.topSide}>
                         <View style={styles.leftSide}>
-                            <Image
-                                source={{uri: profilePicture}}
-                                style={{
-                                    width: 70,
-                                    height: 70,
-                                    borderRadius: 100,
-                                    marginRight: 5,
-                                    resizeMode: "contain"
-                                }}
-                                onLoadEnd={() => setImageLoading(false)}
-                            />
+                            <TouchableOpacity onPress={() => navigation.navigate("ImageViewer", {routeImage: profilePicture})}>
+                                <Image
+                                    source={{uri: profilePicture}}
+                                    style={{
+                                        width: 70,
+                                        height: 70,
+                                        borderRadius: 100,
+                                        marginRight: 5,
+                                        resizeMode: "contain"
+                                    }}
+                                    onLoadEnd={() => setImageLoading(false)}
+                                />
+                            </TouchableOpacity>
                             <View style={styles.rightPart}>
                                 {isUsernameSanitized ? (
                                     <TouchableOpacity onPress={() => setRevealUsername(true)}>
@@ -258,7 +260,6 @@ export default function Profile({route, navigation}) {
                                 style={{
                                     color: (switchMenu ? "#25995C" : "white"),
                                     fontSize: 18,
-                                    fontWeight: "bold"
                                 }}
                             >
                                 Task en cours
@@ -279,7 +280,6 @@ export default function Profile({route, navigation}) {
                                 style={{
                                     color: (switchMenu ?  "white" : "#25995C"),
                                     fontSize: 18,
-                                    fontWeight: "bold"
                                 }}
                             >
                                 Historique
@@ -421,7 +421,6 @@ function DisplayStatus({type, value}) {
                             color: "#FFC107",
                             marginLeft: 6,
                             fontSize: 13,
-                            fontWeight: "bold"
                         }}
                     >
                         {value}
@@ -459,7 +458,6 @@ function DisplayStatus({type, value}) {
                                     color: "#004ef5",
                                     marginLeft: 6,
                                     fontSize: 13,
-                                    fontWeight: "bold"
                                 }}
                             >
                                 Modération

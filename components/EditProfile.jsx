@@ -76,7 +76,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
         }
 
         if (changedUsername) {
-            if (changedUsername.length > 4 && changedUsername.length < 16) {
+            if (changedUsername.length > 4 && changedUsername.length < 11) {
                 if (regex.test(changedUsername)) {
                     if(changedUsername !== username) {
                         getUserByUsername(changedUsername).then((res) => {
@@ -106,7 +106,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
                 }
             } else {
                 setUploading(false)
-                setError("Erreur: le nom doit être compris entre 5 et 15 caractères maximum")
+                setError("Erreur: le nom doit être compris entre 5 et 10 caractères maximum")
             }
         } else if (!image) {
             setUploading(false)

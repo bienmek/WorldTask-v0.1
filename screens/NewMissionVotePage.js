@@ -36,9 +36,9 @@ export default function NewMissionVotePage({route, navigation}) {
                 >
                         <Text
                             style={{
-                                fontWeight: "bold",
                                 fontSize: 22,
-                                color: "black"
+                                color: "black",
+                                textAlign: "center"
                             }}>
                             La mission est elle pertinente ?
                         </Text>
@@ -56,7 +56,7 @@ export default function NewMissionVotePage({route, navigation}) {
                             onPress={() => setMissionRelevance("1")}
                             activeOpacity={0.7}
                         >
-                            <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>oui</Text>
+                            <Text style={{color: "white", fontSize: 18}}>oui</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -72,7 +72,7 @@ export default function NewMissionVotePage({route, navigation}) {
                             onPress={() => setMissionRelevance("2")}
                             activeOpacity={0.7}
                         >
-                            <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>non</Text>
+                            <Text style={{color: "white", fontSize: 18}}>non</Text>
                         </TouchableOpacity>
                 </View>
 
@@ -91,7 +91,6 @@ export default function NewMissionVotePage({route, navigation}) {
                         }}>
                         <Text
                             style={{
-                                fontWeight: "bold",
                                 fontSize: 22,
                                 color: "black",
                                 textAlign: "center"
@@ -115,7 +114,7 @@ export default function NewMissionVotePage({route, navigation}) {
                                 activeOpacity={0.7}
 
                             >
-                                <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>1</Text>
+                                <Text style={{color: "white", fontSize: 18}}>1</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -132,7 +131,7 @@ export default function NewMissionVotePage({route, navigation}) {
                                 onPress={() => setMissionDifficulty("2")}
                                 activeOpacity={0.7}
                             >
-                                <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>2</Text>
+                                <Text style={{color: "white", fontSize: 18}}>2</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -149,7 +148,7 @@ export default function NewMissionVotePage({route, navigation}) {
                                 onPress={() => setMissionDifficulty("3")}
                                 activeOpacity={0.7}
                             >
-                                <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>3</Text>
+                                <Text style={{color: "white", fontSize: 18}}>3</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -166,7 +165,7 @@ export default function NewMissionVotePage({route, navigation}) {
                                 onPress={() => setMissionDifficulty("4")}
                                 activeOpacity={0.7}
                             >
-                                <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>4</Text>
+                                <Text style={{color: "white", fontSize: 18}}>4</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -183,7 +182,7 @@ export default function NewMissionVotePage({route, navigation}) {
                                 onPress={() => setMissionDifficulty("5")}
                                 activeOpacity={0.7}
                             >
-                                <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>5</Text>
+                                <Text style={{color: "white", fontSize: 18}}>5</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -208,7 +207,6 @@ export default function NewMissionVotePage({route, navigation}) {
                         <Text
                             style={{
                                 color: "black",
-                                fontWeight: "bold",
                                 fontSize: 25
                             }}
                         >

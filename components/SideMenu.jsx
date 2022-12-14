@@ -19,7 +19,6 @@ export default function SideMenu({displayMenu, navigation}) {
     const usernameRef = useRef(null);
     const SCREEN_WIDTH = Dimensions.get('window').width
 
-
     useEffect(() => {
         if (user?.uid) {
             getUserFromDb(user?.uid).then((res) => {
@@ -68,7 +67,15 @@ export default function SideMenu({displayMenu, navigation}) {
             >
                 <View style={styles.topSide}>
                     <View style={styles.userInfo}>
-                        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+                        <TouchableOpacity
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}
+                            onPress={() => navigation.navigate("Profile", {routeUser: user?.uid})}
+                            activeOpacity={0.7}
+                        >
                             <Image
                                 source={{uri: profilePicture}}
                                 style={{
@@ -91,7 +98,7 @@ export default function SideMenu({displayMenu, navigation}) {
                             >
                                 @{isSanitized ? sanitizedUsername.toString()+"..." : sanitizedUsername.toString()}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
 
                         <View
                             style={{
@@ -200,7 +207,7 @@ export default function SideMenu({displayMenu, navigation}) {
 const styles = StyleSheet.create({
     topSide: {
         flexDirection: "column",
-        marginTop: 25
+        marginTop: 35
     },
     userInfo: {
         flexDirection: "row",

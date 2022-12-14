@@ -14,7 +14,7 @@ import star5 from "../../assets/images/star_5.png";
 export default function MissionReportCard({data, navigation, availableMissionData}) {
     const [hasVote, setHasVote] = useState(false);
     const [width, setWidth] = useState(60);
-    const [username, setUsername] = useState("");
+    const [username, setUsername] = useState("------");
     const [percentage, setPercentage] = useState("...");
     const {user, getUserFromDb} = useUserContext()
 
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontWeight: "bold",
         fontSize: 13,
         marginLeft: 3,
         textDecorationLine: "underline"

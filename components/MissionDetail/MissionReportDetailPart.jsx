@@ -229,7 +229,7 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                         }}
                         onPress={() => navigation.navigate("MissionReportVotePage", {mission: missionData})}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Voter</Text>
+                        <Text style={{color: "white", fontSize: 22}}>Voter</Text>
                     </TouchableOpacity>
                 ) : (
                     <View
@@ -243,7 +243,7 @@ export default function MissionReportDetailPart({missionData, hasVote, navigatio
                             borderRadius: 20
                         }}
                     >
-                        <Text style={{color: "white", fontWeight: "bold", fontSize: 22}}>Vous avez voté</Text>
+                        <Text style={{color: "white", fontSize: 22}}>Vous avez voté</Text>
                     </View>
 
                 )}
@@ -286,7 +286,6 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontWeight: "bold",
         fontSize: 18,
         marginLeft: 3,
         textDecorationLine: "underline"

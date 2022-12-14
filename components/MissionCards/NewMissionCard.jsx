@@ -11,7 +11,8 @@ export default function NewMissionCard({data, navigation}) {
     const [hasVote, setHasVote] = useState(false);
     const [width, setWidth] = useState(60);
     const [percentage, setPercentage] = useState("...");
-    const {user} = useUserContext()
+    const {user, getUserFromDb} = useUserContext()
+    const [username, setUsername] = useState("------");
 
     const computeVotePercentage = () => {
         const votes = data.votes
@@ -25,6 +26,17 @@ export default function NewMissionCard({data, navigation}) {
         setWidth(120*(percentage/100))
         setPercentage(percentage.toString())
     }
+
+    useEffect(() => {
+        if (data?.creator_uid) {
+            getUserFromDb(data?.creator_uid).then((res) => {
+                res?.forEach((doc) => {
+                    const user = doc.data()
+                    setUsername(user.username)
+                })
+            })
+        }
+    }, [data,])
 
     useEffect(() => {
         computeVotePercentage()
@@ -48,7 +60,7 @@ export default function NewMissionCard({data, navigation}) {
             <View style={styles.header}>
                 <View style={styles.upSide}>
                     <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>@{data.creator_username} · {data.created_at} mins</Text>
+                    <Text style={styles.sideText}>@{username} · {data.created_at} mins</Text>
                 </View>
                 <View style={styles.downSide}>
                     <Ionicons
@@ -198,7 +210,6 @@ const styles = StyleSheet.create({
     },
     locationText: {
         color: "#25995C",
-        fontWeight: "bold",
         fontSize: 13,
         marginLeft: 3,
         textDecorationLine: "underline"
