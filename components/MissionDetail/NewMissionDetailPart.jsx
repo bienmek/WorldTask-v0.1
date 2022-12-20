@@ -1,4 +1,4 @@
-import {Text, View, StyleSheet, TouchableOpacity, Image} from "react-native";
+import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import ImageSwap from "../MissionCards/ImageSwap";
 import {useEffect, useState} from "react";
@@ -13,16 +13,20 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
     const {getUserFromDb, user} = useUserContext()
 
     useEffect(() => {
-        if (missionData?.creator_uid) {
-            getUserFromDb(missionData.creator_uid).then((res) => {
-                res?.forEach((doc) => {
-                    console.log(doc.data())
-                    setProfilePicture(doc.data().profilePicture)
-                    setUsername(doc.data().username)
-                })
+        getUserFromDb(missionData.creator).then((res) => {
+            res?.forEach((doc) => {
+                console.log(doc.data())
+                setProfilePicture(doc.data().profilePicture)
+                setUsername(doc.data().username)
             })
-        }
+        })
     }, [])
+
+    const formatDate = () => {
+        const submitDate = new Date(missionData.creation_date.seconds * 1000)
+        return {localeDate: submitDate.toLocaleDateString(), hours: submitDate.getHours(), minutes: submitDate.getMinutes()}
+    }
+
     return (
         <View style={styles.main}>
             <View styles={styles.missionInfos}>
@@ -43,7 +47,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         color={"black"}
                     />
                     <TouchableOpacity>
-                        <Text style={styles.locationText}>{missionData.location}</Text>
+                        <Text style={styles.locationText}>{missionData.location.streetNumber} {missionData.location.streetName}, {missionData.location.city}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -56,23 +60,34 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                 navigation={navigation}
             />
 
-            <Text
+            <View
                 style={{
-                    fontSize: 18,
-                    textAlign: "left",
-                    marginBottom: 10,
-                    marginLeft: 6,
-                    marginRight: 6,
-                    lineHeight: 28,
-                    color: "black",
-                    marginTop: 10
+                    marginTop: 10,
+                    backgroundColor: "white",
+                    borderRadius: 20,
+                    padding: 10,
+                    width: "98%",
+                    alignSelf: "center",
+                    borderWidth: 2,
+                    borderColor: "#25995C",
+                    justifyContent: "center",
+                    alignItems: "flex-start"
                 }}
             >
-                {missionData.description}
-            </Text>
+                <Text
+                    style={{
+                        fontSize: 18,
+                        textAlign: "left",
+                        lineHeight: 28,
+                        color: "black",
+                    }}
+                >
+                    {missionData.description}
+                </Text>
+            </View>
 
             <View style={styles.bottomInfos}>
-                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData?.creator_uid})}>
+                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData.creator})}>
                     <Image
                         source={{uri: profilePicture}}
                         style={{
@@ -102,7 +117,9 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         marginTop: 10,
                         marginBottom: 10
                     }}
-                >{missionData.precise_date} · {missionData.precise_hour}</Text>
+                >
+                    {formatDate().localeDate} ⋅ {formatDate().hours}:{formatDate().minutes}
+                </Text>
             </View>
 
             <View
@@ -122,7 +139,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.comments.length}</Text>
                 </View>
 
-                {missionData.creator_uid === user?.uid ? (
+                {missionData.creator === user?.uid ? (
                     <TouchableOpacity
                         style={{
                             flex: 2,

@@ -1,5 +1,4 @@
-import {Text, View, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
-import {useFonts} from "expo-font";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import ImageSwap from "./ImageSwap";
@@ -27,15 +26,39 @@ export default function NewMissionCard({data, navigation}) {
         setPercentage(percentage.toString())
     }
 
-    useEffect(() => {
-        if (data?.creator_uid) {
-            getUserFromDb(data?.creator_uid).then((res) => {
-                res?.forEach((doc) => {
-                    const user = doc.data()
-                    setUsername(user.username)
-                })
-            })
+    const formatDate = () => {
+        const submitDate = new Date(data.creation_date.seconds*1000)
+        const now = new Date(Date.now())
+        const diffTime = now.getTime() - submitDate.getTime()
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 0) {
+            return `${diffSeconds} s`
         }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 1) {
+            return `${diffMinutes} min`
+        }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes > 1) {
+            return `${diffMinutes} mins`
+        }
+        if (diffDays === 0 && diffHours >= 1) {
+            return `${diffHours} h`
+        }
+        if (diffDays >= 1) {
+            return `${diffDays} j`
+        }
+    }
+
+    useEffect(() => {
+        getUserFromDb(data.creator).then((res) => {
+            res?.forEach((doc) => {
+                const user = doc.data()
+                setUsername(user.username)
+            })
+        })
     }, [data,])
 
     useEffect(() => {
@@ -43,7 +66,7 @@ export default function NewMissionCard({data, navigation}) {
         setHasVote(false)
         if (user) {
             data.votes.map((vote) => {
-                if (vote.voter.includes(user.email)){
+                if (vote.voter.includes(user.uid)){
                     setHasVote(true)
                 }
             })
@@ -60,7 +83,8 @@ export default function NewMissionCard({data, navigation}) {
             <View style={styles.header}>
                 <View style={styles.upSide}>
                     <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>@{username} · {data.created_at} mins</Text>
+                    <Text style={styles.sideText}>
+                        @{username} · {formatDate()}</Text>
                 </View>
                 <View style={styles.downSide}>
                     <Ionicons
@@ -69,7 +93,7 @@ export default function NewMissionCard({data, navigation}) {
                         color={"black"}
                     />
                     <TouchableOpacity>
-                        <Text style={styles.locationText}>{data.location}</Text>
+                        <Text style={styles.locationText}>{data.location.streetNumber} {data.location.streetName}, {data.location.city}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -91,7 +115,7 @@ export default function NewMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {data.creator_uid !== user?.uid && !hasVote ? (
+                {data.creator !== user?.uid && !hasVote ? (
                     <View
                         style={{
                             flex: 1,

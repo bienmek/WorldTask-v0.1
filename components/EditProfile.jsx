@@ -1,8 +1,4 @@
 import {Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
-import SideMenu from "../components/SideMenu";
-import TopTab from "../components/TopTab";
-import AvailableMissionDetailPart from "../components/MissionDetail/AvailableMissionDetailPart";
-import BottomTab from "../components/BottomTab";
 import {useState} from "react";
 import {useUserContext} from "../context/userContext";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -10,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {db, storage} from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
+import { manipulateAsync, SaveFormat} from "expo-image-manipulator"
 
 
 export default function EditProfile({displayEditProfile, profilePicture, updatePage}) {
@@ -20,6 +17,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
     const [tempProfilePicture, setTempProfilePicture] = useState(profilePicture);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
+    const [fileName, setFileName] = useState(null);
 
     const SCREEN_HEIGHT = Dimensions.get('window').height
 
@@ -30,11 +28,21 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
+            allowsMultipleSelection: false
         }).then((res) => {
             console.log(res)
             if (!res.canceled) {
-                setImage(res.assets[0])
-                setTempProfilePicture(res.assets[0].uri)
+                console.log(res.assets[0].uri)
+                setFileName(res.assets[0].fileName)
+                manipulateAsync(
+                    res.assets[0].uri,
+                    [{resize: {height: 850, width: 850}}],
+                    { compress: 0.5, format: SaveFormat.JPEG }
+                ).then((res) => {
+                    console.log("Resized image", res)
+                    setImage(res)
+                    setTempProfilePicture(res.uri)
+                })
             }
         });
     };
@@ -46,7 +54,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
         const regex = /^[a-z\d]+$/i
 
         if (image) {
-            const storageRef = ref(storage, `profile_picture/${image.fileName}`);
+            const storageRef = ref(storage, `profile_picture/${fileName.split('.')[0]}`);
             fetch(image.uri)
                 .then((res) => {
                     res.blob().then((resBlob) => {
@@ -124,7 +132,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
                     position: "absolute",
                     zIndex: 199
                 }}
-                onPress={() => displayEditProfile(false)}
+                onPress={() => !uploading && displayEditProfile(false)}
             >
             </TouchableOpacity>
 

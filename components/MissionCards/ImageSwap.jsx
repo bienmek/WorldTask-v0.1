@@ -1,4 +1,14 @@
-import {Animated, Button, Dimensions, Image, ScrollView, Text, TouchableOpacity, View} from "react-native";
+import {
+    ActivityIndicator,
+    Animated,
+    Button,
+    Dimensions,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
 import {useEffect, useRef, useState} from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Loading from "../Loading";
@@ -60,8 +70,15 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
                         onPress={() => navigation.navigate("ImageViewer", {routeImage: image})}
                     >
                         {loading && (
-                            <View>
-                                <Text>Loading...</Text>
+                            <View
+                                style={{
+                                    height: "100%",
+                                    width: "100%",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <ActivityIndicator size="small" color="#959595" />
                             </View>
                         )}
                         <Image
