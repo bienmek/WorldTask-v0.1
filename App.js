@@ -20,6 +20,7 @@ import Profile from "./screens/Profile";
 import MakeAnAction from "./screens/MakeAnAction";
 import Notifications from "./screens/Notifications";
 import CreateTask from "./screens/CreateTask";
+import {ModifyTask} from "./screens/ModifyTask";
 
 const Stack = createStackNavigator()
 
@@ -55,13 +56,14 @@ export default function App() {
                         <Stack.Screen name={"NewMissionDetail"} component={NewMissionDetail} options={{headerShown: false}}/>
                         <Stack.Screen name={"AvailableMissionDetail"} component={AvailableMissionDetail} options={{headerShown: false}}/>
                         <Stack.Screen name={"MissionReportDetail"} component={MissionReportDetail} options={{headerShown: false}}/>
-                        <Stack.Screen name={"NewMissionVotePage"} component={NewMissionVotePage} options={{headerShown: false}}/>
-                        <Stack.Screen name={"MissionReportVotePage"} component={MissionReportVotePage} options={{headerShown: false}}/>
+                        <Stack.Screen name={"NewMissionVotePage"} component={NewMissionVotePage} options={{headerShown: false, gestureEnabled: false}}/>
+                        <Stack.Screen name={"MissionReportVotePage"} component={MissionReportVotePage} options={{headerShown: false, gestureEnabled: false}}/>
                         <Stack.Screen name={"ImageViewer"} component={ImageViewer} options={{headerShown: false}}/>
                         <Stack.Screen name={"Profile"} component={Profile} options={{headerShown: false}}/>
                         <Stack.Screen name={"MakeAnAction"} component={MakeAnAction} options={{headerShown: false, animationEnabled: false}}/>
                         <Stack.Screen name={"Notifications"} component={Notifications} options={{headerShown: false, animationEnabled: false}}/>
-                        <Stack.Screen name={"CreateTask"} component={CreateTask} options={{headerShown: false}}/>
+                        <Stack.Screen name={"CreateTask"} component={CreateTask} options={{headerShown: false, gestureEnabled: false}}/>
+                        <Stack.Screen name={"ModifyTask"} component={ModifyTask} options={{headerShown: false, gestureEnabled: false}}/>
                     </Stack.Navigator>
                 </UserContextProvider>
             </NavigationContainer>
@@ -75,7 +77,7 @@ export default function App() {
                     <Stack.Screen name={"Landing"} component={Landing} options={{headerShown: false}}/>
                     <Stack.Screen name={"Login"} component={Login} options={{headerShown: false}}/>
                     <Stack.Screen name={"Register"} component={Register} options={{headerShown: false}}/>
-                    <Stack.Screen name={"EmailVerification"} component={EmailVerification} options={{headerShown: false}}/>
+                    <Stack.Screen name={"EmailVerification"} component={EmailVerification} options={{headerShown: false, gestureEnabled: false}}/>
                 </Stack.Navigator>
             </UserContextProvider>
         </NavigationContainer>

@@ -1,5 +1,15 @@
-import {Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
-import {useState} from "react";
+import {
+    Dimensions,
+    Image,
+    Keyboard,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
+import {useEffect, useState} from "react";
 import {useUserContext} from "../context/userContext";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from 'expo-image-picker';
@@ -7,19 +17,32 @@ import {db, storage} from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
 import { manipulateAsync, SaveFormat} from "expo-image-manipulator"
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 
-export default function EditProfile({displayEditProfile, profilePicture, updatePage}) {
-    const {user, setUpdateContext, updateContext, getUserByUsername, username} = useUserContext()
+export default function EditProfile({displayEditProfile, profilePicture, updatePage, userBio}) {
+    const {user, setUpdateContext, updateContext, getUserByUsername, username, getUserFromDb} = useUserContext()
 
-    const [changedUsername, setChangedUsername] = useState("");
+    const [changedUsername, setChangedUsername] = useState(username);
     const [image, setImage] = useState(null);
     const [tempProfilePicture, setTempProfilePicture] = useState(profilePicture);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const [fileName, setFileName] = useState(null);
+    const [changedBio, setChangedBio] = useState(userBio);
+    const [additionalHeight, setAdditionalHeight] = useState(0 );
 
     const SCREEN_HEIGHT = Dimensions.get('window').height
+
+    useEffect(() => {
+        Keyboard.addListener('keyboardWillShow', () => {
+            setAdditionalHeight(230)
+        })
+
+        Keyboard.addListener('keyboardWillHide', () => {
+            setAdditionalHeight(0)
+        })
+    }, [Keyboard])
 
     const pickImage = () => {
         // No permissions request is necessary for launching the image library
@@ -47,6 +70,31 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
         });
     };
 
+    const generateUUID = () => { // Public Domain/MIT
+        let d = new Date().getTime();//Timestamp
+        let d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            let r = Math.random() * 16;//random number between 0 and 16
+            if(d > 0){//Use timestamp until depleted
+                r = (d + r)%16 | 0;
+                d = Math.floor(d/16);
+            } else {//Use microseconds since page-load if supported
+                r = (d2 + r)%16 | 0;
+                d2 = Math.floor(d2/16);
+            }
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
+    function hasConsecutiveLineBreaks(lst) {
+        for (let i = 0; i < lst.length - 1; i++) {
+            if (lst[i] === '\n' && lst[i + 1] === '\n' && lst[i + 2] === '\n') {
+                return true;
+            }
+        }
+        return false;
+    }
+
     const handleOnPress = () => {
         setUploading(true)
 
@@ -54,7 +102,7 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
         const regex = /^[a-z\d]+$/i
 
         if (image) {
-            const storageRef = ref(storage, `profile_picture/${fileName.split('.')[0]}`);
+            const storageRef = ref(storage, `profile_picture/${generateUUID()}`);
             fetch(image.uri)
                 .then((res) => {
                     res.blob().then((resBlob) => {
@@ -81,6 +129,22 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
                 .catch((error) => console.error(error))
         } else if (!changedUsername) {
             setUploading(false)
+        }
+
+        if (changedBio) {
+            if (changedBio.length < 5 && changedBio > 300) {
+                setError("Erreur: la bio doit être comprise entre 5 et 10 caractères maximum")
+                return
+            }
+            updateDoc(doc(db, "taskers", user.uid), {bio: changedBio.replace(/\n{2,}/g, '\n')})
+                .then(() => {
+                    if (!image && !changedUsername) {
+                        setUploading(false)
+                        setUpdateContext(updateContext+1)
+                        updatePage(1)
+                        displayEditProfile(false)
+                    }
+                })
         }
 
         if (changedUsername) {
@@ -122,33 +186,68 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
     }
 
     return (
-        <>
+        <View
+            style={{
+                height: "100%",
+                width: "100%",
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                flex: 1,
+                zIndex: 99,
+                justifyContent: "center",
+                alignItems: "center"
+            }}
+        >
             <TouchableOpacity
                 style={{
-                    backgroundColor: "rgba(114,114,114,0.58)",
-                    opacity: 0.9,
+                    backgroundColor: "black",
+                    opacity: 0.7,
                     height: "100%",
                     width: "100%",
-                    position: "absolute",
-                    zIndex: 199
+                    zIndex: 99,
+                    position: "absolute"
                 }}
                 onPress={() => !uploading && displayEditProfile(false)}
+                activeOpacity={0.7}
             >
             </TouchableOpacity>
 
-            <View
+            <TouchableOpacity
                 style={{
-                    width: "80%",
+                    backgroundColor: "white",
+                    width: "90%",
                     position: "absolute",
-                    zIndex: 200,
+                    padding: 5,
+                    zIndex: 100,
                     justifyContent: "flex-start",
                     alignItems: "center",
-                    backgroundColor: "white",
+                    borderRadius: 20,
                     alignSelf: "center",
-                    marginTop: SCREEN_HEIGHT/4,
-                    borderRadius: 20
+                    flexDirection: "column",
+                    paddingBottom: additionalHeight
                 }}
+                activeOpacity={1}
+                onPress={() => Keyboard.dismiss()}
             >
+
+                <TouchableOpacity
+                    style={{
+                        position: "absolute",
+                        right: 10,
+                        top: 10
+                    }}
+                    onPress={() => displayEditProfile(false)}
+                    activeOpacity={0.7}
+                >
+                    <AntDesign
+                        name={"close"}
+                        color={"#959595"}
+                        size={30}
+                    />
+                </TouchableOpacity>
 
                 {uploading && (
                     <Text
@@ -229,9 +328,33 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
                     <TextInput
                         placeholder={"Entrez votre nouveau nom..."}
                         style={styles.input}
-                        onChangeText={(mail) => setChangedUsername(mail)}
+                        onChangeText={(username) => setChangedUsername(username)}
                         autoCorrect={false}
                         keyboardType={"twitter"}
+                        value={changedUsername}
+                    />
+
+                    <Text style={styles.label}>Bio</Text>
+
+                    <TextInput
+                        placeholder={"Décrivez vous, donnez les moyens de vous contacter, vos réseaux sociaux, etc..."}
+                        style={{
+                            backgroundColor: "white",
+                            borderColor: "#959595",
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            paddingTop: 10,
+                            paddingBottom: 10,
+                            paddingLeft: 5,
+                            width: "80%",
+                            maxHeight: 150,
+                            lineHeight: 15
+                        }}
+                        onChangeText={(bio) => setChangedBio(bio)}
+                        autoCorrect={false}
+                        multiline={true}
+                        keyboardType={"twitter"}
+                        value={changedBio}
                     />
 
                     <TouchableOpacity
@@ -256,8 +379,8 @@ export default function EditProfile({displayEditProfile, profilePicture, updateP
                     )}
 
                 </View>
-            </View>
-        </>
+            </TouchableOpacity>
+        </View>
     )
 }
 const styles = StyleSheet.create({
@@ -277,13 +400,14 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         backgroundColor: "#25995C",
         borderRadius: 10,
-        marginTop: 8,
+        marginTop: 15,
         justifyContent: "center",
         alignItems: "center"
     },
     label: {
         fontSize: 18,
         marginBottom: 6,
+        marginTop: 10,
         fontWeight: "bold",
         textAlign: "left"
     }

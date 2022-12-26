@@ -92,22 +92,22 @@ export const newMissionData = [
             },
             {
                 voter: "xxxxxxxxxxxxxxxxx",
+                mission_relevance: false,
+                mission_difficulty: 5
+            },
+            {
+                voter: "xxxxxxxxxxxxxxxxx",
+                mission_relevance: false,
+                mission_difficulty: 5
+            },
+            {
+                voter: "xxxxxxxxxxxxxxxxx",
                 mission_relevance: true,
                 mission_difficulty: 5
             },
             {
                 voter: "xxxxxxxxxxxxxxxxx",
-                mission_relevance: false,
-                mission_difficulty: 5
-            },
-            {
-                voter: "xxxxxxxxxxxxxxxxx",
-                mission_relevance: false,
-                mission_difficulty: 5
-            },
-            {
-                voter: "xxxxxxxxxxxxxxxxx",
-                mission_relevance: false,
+                mission_relevance: true,
                 mission_difficulty: 5
             },
             {

@@ -32,20 +32,55 @@ export default function AvailableMissionCard({data, navigation}) {
         }
     }
 
-    useEffect(() => {
-        if (data?.creator_uid) {
-            getUserFromDb(data?.creator_uid).then((res) => {
-                res?.forEach((doc) => {
-                    const user = doc.data()
-                    setUsername(user.username)
-                })
-            })
+    const formatDate = () => {
+        let submitDate
+        if (data.creation_date !== null) {
+            submitDate = new Date(data.creation_date.seconds*1000)
+        } else {
+            submitDate = new Date(Date.now())
         }
+        const now = new Date(Date.now())
+        const diffTime = now.getTime() - submitDate.getTime()
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 0) {
+            return `${diffSeconds} s`
+        }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 1) {
+            return `${diffMinutes} min`
+        }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes > 1) {
+            return `${diffMinutes} mins`
+        }
+        if (diffDays === 0 && diffHours >= 1) {
+            return `${diffHours} h`
+        }
+        if (diffDays >= 1) {
+            return `${diffDays} j`
+        }
+    }
+
+    useEffect(() => {
+        getUserFromDb(data.creator).then((res) => {
+            res.forEach((doc) => {
+                const user = doc.data()
+                setUsername(user.username)
+            })
+        })
     }, [data,])
 
     return (
         <TouchableOpacity
-            style={styles.card}
+            style={{
+                width: "100%",
+                backgroundColor: "white",
+                marginTop: 3,
+                borderWidth: 0.5,
+                borderColor: "#959595"
+            }}
             onPress={() =>
                 navigation.navigate("AvailableMissionDetail", {
                     missionData: data,
@@ -54,35 +89,69 @@ export default function AvailableMissionCard({data, navigation}) {
                 })}
             activeOpacity={0.7}
         >
-            <View style={styles.header}>
-                <View style={styles.upSide}>
-                    <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>@{username} · {data.created_at} mins</Text>
-                </View>
-                <View style={styles.downSide}>
-                    <Ionicons
-                        name={"location-outline"}
-                        size={20}
-                        color={"black"}
-                    />
-                    <TouchableOpacity>
-                        <Text style={styles.locationText}>{data.location}</Text>
-                    </TouchableOpacity>
+            <View
+                style={{
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                    width: "100%",
+                    padding: 5,
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        width: "100%",
+                        flexWrap: "wrap"
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontWeight: "bold",
+                            fontSize: 18,
+                        }}
+                    >
+                        {data.title}
+                    </Text>
+                    <Text style={styles.sideText}>@{username} · {formatDate()}</Text>
                 </View>
 
-                <View style={{position: "absolute", marginLeft: Dimensions.get('window').width - 60}}>
-                    <Image
-                        source={chooseStar(data.difficulty)}
-                        style={{width: 50, height: 50}}
-                    />
+                <View
+                    style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start"
+                    }}
+                >
+                    <View style={styles.downSide}>
+                        <Ionicons
+                            name={"location-outline"}
+                            size={20}
+                            color={"black"}
+                        />
+                        <TouchableOpacity>
+                            <Text style={styles.locationText}>{data.location.streetNumber} {data.location.streetName}, {data.location.city}</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View>
+                        <Image
+                            source={chooseStar(data.difficulty)}
+                            style={{width: 50, height: 50}}
+                        />
+                    </View>
                 </View>
+
 
             </View>
             <ImageSwap
                 images={data.images}
                 imageHeight={300}
                 imageMarginTop={10}
-                imageIndexMarginTop={80}
+                imageIndexMarginTop={20}
                 navigation={navigation}
             />
 
@@ -107,7 +176,7 @@ export default function AvailableMissionCard({data, navigation}) {
                         borderRadius: 20
                     }}
                 >
-                    <Text style={{color: "white", fontSize: 18}}>Choisir la mission</Text>
+                    <Text style={{color: "white", fontSize: 18}}>Choisir la task</Text>
                 </View>
 
                 <View

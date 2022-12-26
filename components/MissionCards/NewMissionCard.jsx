@@ -15,19 +15,31 @@ export default function NewMissionCard({data, navigation}) {
 
     const computeVotePercentage = () => {
         const votes = data.votes
-        let score = 0
-        votes.map((vote) => {
-            if (vote.mission_relevance) {
-                score++
-            }
-        })
-        const percentage =  Math.round((score/votes.length)*100)
-        setWidth(120*(percentage/100))
-        setPercentage(percentage.toString())
+        if (votes.length > 0) {
+            let score = 0
+            votes.map((vote) => {
+                if (vote.mission_relevance) {
+                    score++
+                }
+            })
+            const percentage =  Math.round((score/votes.length)*100)
+            console.log(percentage)
+            setWidth(120*(percentage/100))
+            setPercentage(percentage.toString())
+        } else {
+            setWidth(120)
+            setPercentage("Pas de vote")
+        }
     }
 
     const formatDate = () => {
-        const submitDate = new Date(data.creation_date.seconds*1000)
+        let submitDate
+        if (data.creation_date !== null) {
+            submitDate = new Date(data.creation_date.seconds*1000)
+        } else {
+            submitDate = new Date(Date.now())
+
+        }
         const now = new Date(Date.now())
         const diffTime = now.getTime() - submitDate.getTime()
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -53,25 +65,20 @@ export default function NewMissionCard({data, navigation}) {
     }
 
     useEffect(() => {
-        getUserFromDb(data.creator).then((res) => {
-            res?.forEach((doc) => {
-                const user = doc.data()
-                setUsername(user.username)
-            })
-        })
-    }, [data,])
-
-    useEffect(() => {
         computeVotePercentage()
-        setHasVote(false)
-        if (user) {
-            data.votes.map((vote) => {
-                if (vote.voter.includes(user.uid)){
-                    setHasVote(true)
-                }
-            })
+
+        getUserFromDb(data.creator)
+            .then((res) => {
+                res?.forEach((doc) => {
+                    const user = doc.data()
+                    setUsername(user.username)
+                })
+        })
+
+        if (data.votes.some((item) => item.voter === user.uid)) {
+            setHasVote(true)
         }
-    }, [data.votes, user]);
+    }, [data])
 
 
     return (
@@ -80,11 +87,43 @@ export default function NewMissionCard({data, navigation}) {
             onPress={() => navigation.navigate("NewMissionDetail", {missionData: data, hasVote})}
             activeOpacity={0.7}
         >
-            <View style={styles.header}>
-                <View style={styles.upSide}>
-                    <Text style={styles.title}>{data.title}</Text>
-                    <Text style={styles.sideText}>
-                        @{username} · {formatDate()}</Text>
+            <View
+                style={{
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                    width: "100%",
+                    padding: 5,
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        width: "100%",
+                        flexWrap: "wrap"
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontWeight: "bold",
+                            fontSize: 18,
+                        }}
+                    >
+                        {data.title}
+                    </Text>
+                    <Text
+                        style={{
+                            color: "#959595",
+                            fontSize: 11,
+                            marginLeft: 4,
+                            marginTop: 3,
+                            textAlign: "center"
+                        }}
+                    >
+                        @{username} · {formatDate()}
+                    </Text>
                 </View>
                 <View style={styles.downSide}>
                     <Ionicons
@@ -101,7 +140,7 @@ export default function NewMissionCard({data, navigation}) {
                 images={data.images}
                 imageHeight={300}
                 imageMarginTop={10}
-                imageIndexMarginTop={80}
+                imageIndexMarginTop={20}
                 navigation={navigation}
             />
 
@@ -115,7 +154,7 @@ export default function NewMissionCard({data, navigation}) {
                     <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{data.comments.length}</Text>
                 </View>
 
-                {data.creator !== user?.uid && !hasVote ? (
+                {(data.creator !== user?.uid) && !hasVote ? (
                     <View
                         style={{
                             flex: 1,
@@ -164,7 +203,14 @@ export default function NewMissionCard({data, navigation}) {
                                 zIndex: 99
                             }}
                         >
-                            {percentage}%
+                            {data.votes.length > 0 ? (
+                                <>
+                                    {percentage}%
+                                </>
+                            ) : (
+                                <>{percentage}</>
+                            )}
+
                         </Text>
                         <View
                             style={{
@@ -200,7 +246,6 @@ export default function NewMissionCard({data, navigation}) {
 
 const styles = StyleSheet.create({
     card: {
-        height: 400,
         width: "100%",
         backgroundColor: "white",
         marginTop: 3,
@@ -214,7 +259,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: "bold",
-        fontSize: 18
+        fontSize: 18,
     },
     sideText: {
         color: "#959595",

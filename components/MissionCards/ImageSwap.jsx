@@ -27,7 +27,7 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
     }
 
     return (
-        <>
+        <View>
             <View
                 style={{
                     position: "absolute",
@@ -37,8 +37,8 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
                     borderRadius: 100,
                     justifyContent: "center",
                     alignItems: "center",
-                    marginLeft: SCREEN_WIDTH-45,
-                    marginTop: imageIndexMarginTop,
+                    right: 10,
+                    top: imageIndexMarginTop,
                     zIndex: 99,
                     opacity: 0.7,
                 }}
@@ -48,7 +48,7 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={{marginTop: imageMarginTop, width: "100%", }}
+                style={{width: "100%", }}
                 scrollEventThrottle={16}
                 ref={scroll}
                 onScroll={(event) => setCurrentOffset(event.nativeEvent.contentOffset.x)}
@@ -93,6 +93,6 @@ export default function ImageSwap({images, imageHeight, imageMarginTop, imageInd
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-        </>
+        </View>
     )
 }

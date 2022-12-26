@@ -17,7 +17,13 @@ export default function AvailableMissionDetail({route, navigation}) {
             )}
             <TopTab navigation={navigation}  displayMenu={(state) => setDisplayMenu(state)}/>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <AvailableMissionDetailPart missionData={missionData} star={star} readOnly={readOnly} navigation={navigation}/>
+                <AvailableMissionDetailPart
+                    missionData={missionData}
+                    star={star}
+                    readOnly={readOnly}
+                    navigation={navigation}
+                    route={route}
+                />
             </ScrollView>
             <BottomTab navigation={navigation} />
         </>

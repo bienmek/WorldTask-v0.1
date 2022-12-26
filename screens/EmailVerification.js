@@ -22,7 +22,8 @@ export default function EmailVerification({route, navigation}) {
                         email: user.email,
                         username: user.displayName,
                         profilePicture: "https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile_picture%2Fblank_pp.png?alt=media&token=0c6a438a-6dcf-4491-94d5-c1ee187e6c08",
-                        stars: 0
+                        stars: 0,
+                        ongoing_task: null
                     })
                 }
                 else {

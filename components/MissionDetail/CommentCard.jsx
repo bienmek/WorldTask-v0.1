@@ -1,37 +1,69 @@
-import {Text, View, StyleSheet, Image, TouchableOpacity, Dimensions} from "react-native";
+import {Text, View, StyleSheet, Image, TouchableOpacity, Dimensions, Keyboard} from "react-native";
 import {useUserContext} from "../../context/userContext";
 import {useEffect, useState} from "react";
-import {collection, getDocs, query, where} from "firebase/firestore";
-import {db} from "../../firebase";
 import Octicons from "react-native-vector-icons/Octicons";
+import {doc, onSnapshot} from "firebase/firestore";
+import {db} from "../../firebase";
 
 
-export default function CommentCard({comment, replyTo, hasChild, navigation}) {
-    const {getUserFromDb, user} = useUserContext()
+export default function CommentCard({comment, replyTo, hasChild, navigation, callbackReplyTo, route}) {
+    const {getUserFromDb} = useUserContext()
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("");
     const [repliedAuthor, setRepliedAuthor] = useState("");
 
     useEffect(() => {
-        if (comment?.author) {
-            getUserFromDb(comment.author).then((res) => {
-                res?.forEach((doc) => {
-                    const user = doc.data()
-                    setProfilePicture(user.profilePicture)
-                    setUsername(user.username)
-                })
+        const retrieveUser = () => {
+            const unsub1 = onSnapshot(doc(db, "taskers", comment.author), (snapshot) => {
+                const user = snapshot.data()
+                setProfilePicture(user.profilePicture)
+                setUsername(user.username)
             })
-        }
-        if (replyTo) {
-            getUserFromDb(replyTo.author).then((res) => {
-                res?.forEach((doc) => {
-                    const user = doc.data()
+            if (replyTo) {
+                const unsub2 = onSnapshot(doc(db, "taskers", replyTo.author), (snapshot) => {
+                    const user = snapshot.data()
                     setRepliedAuthor(user.username)
                 })
-            })
-        }
-    }, [])
+                return () => {
+                    unsub1()
+                    unsub2()
+                }
+            }
 
+            return () => {
+                unsub1()
+            }
+        }
+
+        retrieveUser()
+
+    }, []);
+
+    const formatDate = () => {
+        const submitDate = new Date(comment.created_at)
+        const now = new Date(Date.now())
+        const diffTime = now.getTime() - submitDate.getTime()
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 0) {
+            return `${diffSeconds} s`
+        }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes === 1) {
+            return `${diffMinutes} min`
+        }
+        if (diffDays === 0 && diffHours === 0 && diffMinutes > 1) {
+            return `${diffMinutes} mins`
+        }
+        if (diffDays === 0 && diffHours >= 1) {
+            return `${diffHours} h`
+        }
+        if (diffDays >= 1) {
+            return `${diffDays} j`
+        }
+    }
 
     return (
         <View
@@ -74,13 +106,18 @@ export default function CommentCard({comment, replyTo, hasChild, navigation}) {
                         </View>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={{marginRight: 6}}>
-                        <Octicons
-                            name={"reply"}
-                            size={30}
-                            color={"black"}
-                        />
-                    </TouchableOpacity>
+                    {route.name !== "AvailableMissionDetail" && (
+                        <TouchableOpacity
+                            style={{marginRight: 6}}
+                            onPress={() => callbackReplyTo({comment: comment.uid, author: username})}
+                        >
+                            <Octicons
+                                name={"reply"}
+                                size={30}
+                                color={"black"}
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
                 {replyTo && (
                     <View
@@ -91,17 +128,21 @@ export default function CommentCard({comment, replyTo, hasChild, navigation}) {
                     >
                         <Text style={{color: "#959595", fontSize: 15}}>En réponse à</Text>
                         <View>
-                            <Text
-                                style={{
-                                    color: "#0066ff",
-                                    textDecorationLine: "underline",
-                                    marginLeft: 3,
-                                    fontWeight: "bold",
-                                    fontSize: 15
-                                }}
+                            <TouchableOpacity
+                                activeOpacity={0.7}
                             >
-                                @{repliedAuthor}
-                            </Text>
+                                <Text
+                                    style={{
+                                        color: "#0066ff",
+                                        textDecorationLine: "underline",
+                                        marginLeft: 3,
+                                        fontWeight: "bold",
+                                        fontSize: 15
+                                    }}
+                                >
+                                    @{repliedAuthor}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 )}
@@ -119,7 +160,7 @@ export default function CommentCard({comment, replyTo, hasChild, navigation}) {
                             color: "black"
                         }}
                     >
-                        {comment.comment}
+                        {comment?.comment}
                     </Text>
                 </View>
 
@@ -130,7 +171,7 @@ export default function CommentCard({comment, replyTo, hasChild, navigation}) {
                             fontSize: 11,
                         }}
                     >
-                        {comment.created_at.split('-')[0]} · {comment.created_at.split('-')[1]}
+                        Il y a {formatDate()}
                     </Text>
                 </View>
             </View>

@@ -44,7 +44,7 @@ export default function SideMenu({displayMenu, navigation}) {
         <>
             <TouchableOpacity
                 style={{
-                    backgroundColor: "rgba(114,114,114,0.58)",
+                    backgroundColor: "black",
                     opacity: 0.5,
                     height: "100%",
                     width: "100%",
@@ -52,6 +52,7 @@ export default function SideMenu({displayMenu, navigation}) {
                     zIndex: 200
                 }}
                 onPress={() => displayMenu(false)}
+                activeOpacity={0.5}
             >
             </TouchableOpacity>
 
@@ -73,7 +74,10 @@ export default function SideMenu({displayMenu, navigation}) {
                                 alignItems: "center",
                                 justifyContent: "center"
                             }}
-                            onPress={() => navigation.navigate("Profile", {routeUser: user?.uid})}
+                            onPress={() => {
+                                navigation.navigate("Profile", {routeUser: user?.uid})
+                                displayMenu(false)
+                            }}
                             activeOpacity={0.7}
                         >
                             <Image

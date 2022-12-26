@@ -7,23 +7,31 @@ import {useUserContext} from "../../context/userContext";
 import CommentTab from "./CommentTab";
 import star5 from "../../assets/images/star_5.png"
 
-export default function AvailableMissionDetailPart({missionData, star, readOnly, navigation}) {
+export default function AvailableMissionDetailPart({missionData, star, readOnly, navigation, route}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("------");
     const {getUserFromDb, user} = useUserContext()
     const REWARD = 120
 
     useEffect(() => {
-        if (missionData?.creator_uid) {
-            getUserFromDb(missionData.creator_uid).then((res) => {
-                res?.forEach((doc) => {
-                    console.log(doc.data())
-                    setProfilePicture(doc.data().profilePicture)
-                    setUsername(doc.data().username)
-                })
+        getUserFromDb(missionData.creator).then((res) => {
+            res?.forEach((doc) => {
+                setProfilePicture(doc.data().profilePicture)
+                setUsername(doc.data().username)
             })
-        }
+        })
     }, [])
+
+    const formatDate = () => {
+        let submitDate
+        if (missionData.creation_date !== null) {
+            submitDate = new Date(missionData.creation_date.seconds*1000)
+        } else {
+            submitDate = new Date(Date.now())
+
+        }
+        return {localeDate: submitDate.toLocaleDateString(), hours: submitDate.getHours(), minutes: submitDate.getMinutes()}
+    }
 
     return (
         <View style={styles.main}>
@@ -38,51 +46,70 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                     {missionData.title}
                 </Text>
 
-                <View style={styles.downSide}>
-                    <Ionicons
-                        name={"location-outline"}
-                        size={20}
-                        color={"black"}
-                    />
-                    <TouchableOpacity>
-                        <Text style={styles.locationText}>{missionData.location}</Text>
-                    </TouchableOpacity>
-                </View>
+                <View
+                    style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start"
+                    }}
+                >
+                    <View style={styles.downSide}>
+                        <Ionicons
+                            name={"location-outline"}
+                            size={20}
+                            color={"black"}
+                        />
+                        <TouchableOpacity>
+                            <Text style={styles.locationText}>{missionData.location.streetNumber} {missionData.location.streetName}, {missionData.location.city}</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={{position: "absolute", marginLeft: Dimensions.get('window').width - 70}}>
-                    <Image
-                        source={star}
-                        style={{width: 70, height: 70}}
-                    />
+                    <View>
+                        <Image
+                            source={star}
+                            style={{width: 50, height: 50}}
+                        />
+                    </View>
                 </View>
-
             </View>
 
             <ImageSwap
                 images={missionData.images}
                 imageHeight={300}
                 imageMarginTop={20}
-                imageIndexMarginTop={100}
+                imageIndexMarginTop={30}
                 navigation={navigation}
             />
 
-            <Text
+            <View
                 style={{
-                    fontSize: 18,
-                    textAlign: "left",
-                    marginBottom: 10,
-                    marginLeft: 6,
-                    marginRight: 6,
-                    lineHeight: 28,
-                    color: "black",
-                    marginTop: 10
+                    marginTop: 10,
+                    backgroundColor: "white",
+                    borderRadius: 20,
+                    padding: 10,
+                    width: "98%",
+                    alignSelf: "center",
+                    borderWidth: 2,
+                    borderColor: "#25995C",
+                    justifyContent: "center",
+                    alignItems: "flex-start"
                 }}
             >
-                {missionData.description}
-            </Text>
+                <Text
+                    style={{
+                        fontSize: 18,
+                        textAlign: "left",
+                        lineHeight: 28,
+                        color: "black",
+                    }}
+                >
+                    {missionData.description}
+                </Text>
+            </View>
 
             <View style={styles.bottomInfos}>
-                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData?.creator_uid})}>
+                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData.creator})}>
                     <Image
                         source={{uri: profilePicture}}
                         style={{
@@ -112,7 +139,9 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                         marginTop: 10,
                         marginBottom: 10
                     }}
-                >{missionData.precise_date} · {missionData.precise_hour}</Text>
+                >
+                    {formatDate().localeDate} ⋅ {formatDate().hours}:{formatDate().minutes}
+                </Text>
             </View>
 
             <View
@@ -144,7 +173,7 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                             borderRadius: 20
                         }}
                     >
-                        <Text style={{color: "white", fontSize: 20}}>Choisir la mission</Text>
+                        <Text style={{color: "white", fontSize: 20}}>Choisir la task</Text>
                     </TouchableOpacity>
                 ) : (
                     <></>
@@ -177,7 +206,17 @@ export default function AvailableMissionDetailPart({missionData, star, readOnly,
                     />
                 </View>
             )}
-            <CommentTab comments={missionData.comments} navigation={navigation}/>
+            <CommentTab
+                comments={
+                    missionData.comments.sort((a, b) => {
+                        const dateA = new Date(a.created_at);
+                        const dateB = new Date(b.created_at);
+                        return dateB - dateA;
+                    })
+                }
+                navigation={navigation}
+                route={route}
+            />
         </View>
     )
 }

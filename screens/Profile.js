@@ -1,6 +1,6 @@
 import {useUserContext} from "../context/userContext";
 import TopTab from "../components/TopTab";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import SideMenu from "../components/SideMenu";
 import {ScrollView, Text, View, StyleSheet, Image, Dimensions, TouchableOpacity, SafeAreaView} from "react-native";
 import BottomTab from "../components/BottomTab";
@@ -10,8 +10,11 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 import Loading from "../components/Loading";
 import EditProfile from "../components/EditProfile";
+import OngoingTask from "../components/OngoingTask";
+import {doc, onSnapshot, deleteDoc, updateDoc} from "firebase/firestore";
+import {db} from "../firebase";
 export default function Profile({route, navigation}) {
-    const {getUserFromDb, user} = useUserContext()
+    const {user} = useUserContext()
     const {routeUser} = route.params
 
     const [displayMenu, setDisplayMenu] = useState(false);
@@ -29,24 +32,49 @@ export default function Profile({route, navigation}) {
     const [imageLoading, setImageLoading] = useState(true);
     const [displayEditProfile, setDisplayEditProfile] = useState(false);
     const [update, setUpdate] = useState(0);
+    const [ongoingTask, setOngoingTask] = useState(null);
+    const [ongoingTaskPath, setOngoingTaskPath] = useState(null);
+    const [updateChild, setUpdateChild] = useState(0);
+    const [showDeleteTask, setShowDeleteTask] = useState(false);
+    const [userBio, setUserBio] = useState("");
+
+    const scrollRef = useRef(null)
 
     const SCREEN_WIDTH = Dimensions.get('window').width
 
     useEffect(() => {
-        if (routeUser) {
-            getUserFromDb(routeUser).then((res) => {
-                res?.forEach((doc) => {
-                    setStars(doc.data().stars)
-                    setSanitizedEmail(doc.data().email)
-                    setUsername(doc.data().username)
-                    setSanitizedUsername(doc.data().username)
-                    setProfilePicture(doc.data().profilePicture)
-                    setStatus(doc.data()?.status)
-                    setDataLoading(false)
+        setDataLoading(true)
+        setOngoingTask(null)
+        setOngoingTaskPath(null)
+        onSnapshot(doc(db, "taskers", routeUser), (snapshot) => {
+            setStars(snapshot.data().stars)
+            setSanitizedEmail(snapshot.data().email)
+            setUsername(snapshot.data().username)
+            setSanitizedUsername(snapshot.data().username)
+            setProfilePicture(snapshot.data().profilePicture)
+            setStatus(snapshot.data()?.status)
+            setUserBio(snapshot.data().bio)
+            if (snapshot.data().ongoing_task) {
+                const ongoing_task = snapshot.data().ongoing_task
+                onSnapshot(doc(db, ongoing_task.path, ongoing_task.task_uid), (doc) => {
+                    setOngoingTask(doc.data())
+                    setOngoingTaskPath(ongoing_task.path)
                 })
+            }
+            setDataLoading(false)
+            setUpdateChild(updateChild+1)
+        })
+
+        delay(300)
+            .then(() => {
+
             })
-        }
-    }, [routeUser,update])
+
+    }, [routeUser, update])
+
+    const delay = (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+    }
 
     const usernameSanitizer = (event) => {
         const WIDTH = event.nativeEvent.layout.width
@@ -78,6 +106,18 @@ export default function Profile({route, navigation}) {
         }
     }
 
+    const deleteTask = () => {
+        setDataLoading(true)
+        deleteDoc(doc(db, ongoingTaskPath, ongoingTask?.uid))
+            .then(() => {
+                updateDoc(doc(db, "taskers", user?.uid), {ongoing_task: null})
+                    .then(() => {
+                        setShowDeleteTask(false)
+                        setUpdate(update+1)
+                    })
+            })
+    }
+
     return (
         <>
             {displayMenu && (
@@ -91,14 +131,140 @@ export default function Profile({route, navigation}) {
                     displayEditProfile={(state) => setDisplayEditProfile(state)}
                     profilePicture={profilePicture}
                     updatePage={(state) => setUpdate(update+state)}
+                    userBio={userBio}
                 />
             )}
             {(dataLoading || imageLoading) && (
                 <Loading />
             )}
+
+            {showDeleteTask && (
+                <View
+                    style={{
+                        height: "100%",
+                        width: "100%",
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        flex: 1,
+                        zIndex: 99,
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: "black",
+                            opacity: 0.7,
+                            height: "100%",
+                            width: "100%",
+                            zIndex: 99,
+                            position: "absolute"
+                        }}
+                        onPress={() => setShowDeleteTask(false)}
+                        activeOpacity={0.7}
+                    >
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            backgroundColor: "white",
+                            width: "70%",
+                            position: "absolute",
+                            padding: 20,
+                            zIndex: 100,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20,
+                            alignSelf: "center",
+                            flexDirection: "column"
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: "black",
+                                fontSize: 22,
+                                textAlign: "center"
+                            }}
+                        >
+                            Êtes-vous sûr de vouloir supprimer votre task ?
+                        </Text>
+
+                        <Text
+                            style={{
+                                color: "#959595",
+                                fontSize: 15,
+                                fontStyle: "italic",
+                                textAlign: "center"
+                            }}
+                        >
+                            (La suppression de votre task sera irréversible. Si elle ne vous satisfait pas, vous pouvez encore la modifier)
+                        </Text>
+
+                        <View
+                            style={{
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginTop: 20,
+                                width: "70%"
+                            }}
+                        >
+                            <TouchableOpacity
+                                style={{
+                                    width: "100%",
+                                    backgroundColor: "red",
+                                    borderRadius: 20,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 10,
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                                activeOpacity={0.7}
+                                onPress={deleteTask}
+                            >
+                                <Text style={{color: "white", fontSize: 18}}>
+                                    oui
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={{
+                                    width: "100%",
+                                    backgroundColor: "#25995C",
+                                    borderRadius: 20,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 10,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    marginTop: 5
+                                }}
+                                activeOpacity={0.7}
+                                onPress={() => setShowDeleteTask(false)}
+                            >
+                                <Text style={{color: "white", fontSize: 18}}>
+                                    non
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+            )}
+
             <TopTab navigation={navigation} displayMenu={(state) => setDisplayMenu(state)}/>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.userInfo}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                ref={scrollRef}
+            >
+                <View
+                    style={styles.userInfo}
+                    onLayout={() => {
+                        if (ongoingTask && routeUser === user?.uid) {
+                            scrollRef.current.scrollToEnd({y: 0, animated: true})
+                        }
+                    }}
+                >
                     <View style={styles.topSide}>
                         <View style={styles.leftSide}>
                             <TouchableOpacity onPress={() => navigation.navigate("ImageViewer", {routeImage: profilePicture})}>
@@ -203,6 +369,34 @@ export default function Profile({route, navigation}) {
                         ))}
                     </View>
 
+                    <View
+                        style={{
+                            marginBottom: 10,
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            flexDirection: "row",
+                            padding: 10,
+                            width: "95%",
+                            flexWrap: "wrap",
+                            backgroundColor: "white",
+                            borderRadius: 20,
+                            alignSelf: "center",
+                            borderWidth: 2,
+                            borderColor: "#25995C"
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 15,
+                                fontStyle: "italic",
+                                maxHeight: 250,
+                                lineHeight: 20
+                            }}
+                        >
+                            {userBio ? userBio: `Vous pouvez me contacter si besoin à l'adresse suivante: ${sanitizedEmail.toString()}`}
+                        </Text>
+                    </View>
+
                     {routeUser === user?.uid ? (
                         <TouchableOpacity style={{marginRight: 15, alignSelf: "flex-end"}} onPress={() => setDisplayEditProfile(true)}>
                             <Octicons
@@ -288,11 +482,21 @@ export default function Profile({route, navigation}) {
                     </View>
                 </View>
 
-                <View>
+                <View
+                    onLayout={() => {
+                        setUpdateChild(updateChild+1)
+                    }}
+                >
                     {!switchMenu ? (
-                        <View>
-                            <Text>Task en cours</Text>
-                        </View>
+                        <OngoingTask
+                            ongoingTask={ongoingTask}
+                            ongoingTaskPath={ongoingTaskPath}
+                            navigation={navigation}
+                            cbUpdate={updateChild}
+                            showDeleteTask={setShowDeleteTask}
+                            routeUser={routeUser}
+                            username={username}
+                        />
                     ) : (
                         <View>
                             <Text>Historique</Text>
@@ -336,8 +540,12 @@ const styles = StyleSheet.create({
     },
     status: {
         marginTop: 20,
-        marginLeft: 10,
-        alignItems: "flex-start"
+        justifyContent: "flex-start",
+        alignItems: "center",
+        flexDirection: "row",
+        padding: 10,
+        width: "100%",
+        flexWrap: "wrap"
     }
 })
 
@@ -353,7 +561,7 @@ function RevealSanitizedText({text, close}) {
                     height: "100%",
                     width: "100%",
                     position: "absolute",
-                    zIndex: 98
+                    zIndex: 98,
                 }}
                 onPress={() => close(true)}
             >
@@ -404,7 +612,8 @@ function DisplayStatus({type, value}) {
                         borderRadius: 20,
                         borderWidth: 1,
                         paddingLeft: 10,
-                        paddingRight: 10
+                        paddingRight: 10,
+                        marginLeft: 3
                 }}
                 >
                     <View

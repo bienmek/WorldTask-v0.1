@@ -1,40 +1,42 @@
-import {useEffect, useRef, useState} from "react";
+import {ScrollView, View, Text, TouchableOpacity, TextInput, StyleSheet, Image} from "react-native";
 import SideMenu from "../components/SideMenu";
 import TopTab from "../components/TopTab";
-import {Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {useEffect, useState} from "react";
 import BottomTab from "../components/BottomTab";
-import {useFonts} from "expo-font";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import * as ImagePicker from "expo-image-picker";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import * as Location from "expo-location";
+import {getAddress} from "../functions/geo-location";
 import {getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
 import {db, storage} from "../firebase";
 import {manipulateAsync, SaveFormat} from "expo-image-manipulator";
-import * as Location from 'expo-location';
-import {getAddress} from "../functions/geo-location";
-import {addDoc, collection, serverTimestamp, updateDoc, doc} from "firebase/firestore";
+import {useFonts} from "expo-font";
+import {addDoc, collection, doc, serverTimestamp, updateDoc} from "firebase/firestore";
 import {useUserContext} from "../context/userContext";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 
-export default function CreateTask({navigation}) {
-    const [displayMenu, setDisplayMenu] = useState(false);
-    const [taskInfo, setTaskInfo] = useState({title: '', description: ''});
-    const [location, setLocation] = useState(null);
-    const [images, setImages] = useState([]);
-    const [error, setError] = useState('');
-    const [publishingTask, setPublishingTask] = useState(false);
-    const [descPos, setDescPos] = useState(null);
-    const [photoPos, setPhotoPos] = useState(null);
-    const [showTitleDesc, setShowTitleDesc] = useState(false);
-    const [showDescDesc, setShowDescDesc] = useState(false);
-    const [showPhotosDesc, setShowPhotosDesc] = useState(false);
+export function ModifyTask({navigation, route}) {
+    const {routeTask} = route.params
 
     const {user} = useUserContext()
+
+    const [displayMenu, setDisplayMenu] = useState(false);
+    const [taskInfo, setTaskInfo] = useState({title: routeTask.title, description: routeTask.description});
+    const [images, setImages] = useState(routeTask.images);
+    const [location, setLocation] = useState(null);
+    const [error, setError] = useState("");
+    const [publishingTask, setPublishingTask] = useState(false);
+    const [showModifyTask, setShowModifyTask] = useState(false);
 
     const [loaded] = useFonts({
         introScript: require('../assets/font/intro-script-demo-medium.otf'),
     });
+
+    useEffect(() => {
+        getUserLocation()
+    }, [])
 
     const getUserLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -50,10 +52,6 @@ export default function CreateTask({navigation}) {
                     .then((res) => setLocation(res))
             })
     }
-
-    useEffect(() => {
-        getUserLocation()
-    }, [])
 
     const generateUUID = () => { // Public Domain/MIT
         let d = new Date().getTime();//Timestamp
@@ -81,6 +79,7 @@ export default function CreateTask({navigation}) {
     }
 
     const onSubmit = async () => {
+        setShowModifyTask(false)
         try {
             if (!location) {
                 setError('Erreur: attendez la fin de la récupération de vos données de géolocalisation')
@@ -117,52 +116,44 @@ export default function CreateTask({navigation}) {
             setError('')
             setPublishingTask(true)
             const imagesUrl = [];
+            images.map((image) => {
+                if (!image.uri) {
+                    imagesUrl.push(image)
+                }
+            })
             const imagesPromises = images.map((image) => {
-                const storageRef = ref(storage, `mission_picture/${generateUUID()}`);
-                return compressImage(image)
-                    .then((compressedImage) => fetch(compressedImage.uri))
-                    .then((response) => response.blob())
-                    .then((blob) => {
-                            const uploadTask = uploadBytesResumable(storageRef, blob)
-                            return new Promise((resolve, reject) => {
-                                uploadTask.on("state_changed",
-                                    () => console.log(""),
-                                    (error) => reject(error),
-                                    () => {
-                                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                                            imagesUrl.push(downloadURL)
-                                            resolve();
+                if (image.uri) {
+                    const storageRef = ref(storage, `mission_picture/${generateUUID()}`);
+                    return compressImage(image.uri && image)
+                        .then((compressedImage) => fetch(compressedImage.uri))
+                        .then((response) => response.blob())
+                        .then((blob) => {
+                                const uploadTask = uploadBytesResumable(storageRef, blob)
+                                return new Promise((resolve, reject) => {
+                                    uploadTask.on("state_changed",
+                                        () => console.log(""),
+                                        (error) => reject(error),
+                                        () => {
+                                            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                                                imagesUrl.push(downloadURL)
+                                                resolve();
+                                            });
                                         });
-                                    });
-                            });
-                        }
-                    )
+                                });
+                            }
+                        )
+                }
             });
             await Promise.all(imagesPromises);
-            const docRef = await addDoc(collection(db, "new_tasks"), {
-                uid: null,
+            await updateDoc(doc(db, "new_tasks", routeTask.uid), {
                 title: taskInfo.title,
-                description: taskInfo.description.replace(/\n{3,}/g, '\n\n'),
-                creator: user.uid,
+                description: taskInfo.description,
                 creation_date: serverTimestamp(),
                 location: location,
                 images: imagesUrl,
-                comments: [],
-                shares: [],
                 votes: [],
-                hasBeenModified: false
+                hasBeenModified: true
             })
-            const taskRef = doc(db, "new_tasks", docRef.id)
-            const userRef = doc(db, "taskers", user.uid)
-
-            await updateDoc(taskRef, {uid: docRef.id})
-            await updateDoc(userRef, {
-                ongoing_task: {
-                    path: "new_tasks",
-                    task_uid: docRef.id
-                }
-            })
-
             setPublishingTask(false)
             navigation.navigate("Profile", {routeUser: user.uid})
         } catch (error) {
@@ -180,66 +171,121 @@ export default function CreateTask({navigation}) {
                 <SideMenu displayMenu={(state) => setDisplayMenu(state)} navigation={navigation}/>
             )}
             <TopTab navigation={navigation} displayMenu={(state) => setDisplayMenu(state)}/>
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                onScroll={() => {
-                    setShowTitleDesc(false)
-                    setShowDescDesc(false)
-                    setShowPhotosDesc(false)
-                }}
-                scrollEventThrottle={16}
-            >
-
+            {showModifyTask && (
                 <View
-                    style={styles.content}
+                    style={{
+                        height: "100%",
+                        width: "100%",
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        flex: 1,
+                        zIndex: 99,
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
                 >
-                    {showTitleDesc && (
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: "black",
+                            opacity: 0.7,
+                            height: "100%",
+                            width: "100%",
+                            zIndex: 99,
+                            position: "absolute"
+                        }}
+                        onPress={() => setShowModifyTask(false)}
+                        activeOpacity={0.7}
+                    >
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            backgroundColor: "white",
+                            width: "70%",
+                            position: "absolute",
+                            padding: 20,
+                            zIndex: 100,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 20,
+                            alignSelf: "center",
+                            flexDirection: "column"
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: "black",
+                                fontSize: 22,
+                                textAlign: "center"
+                            }}
+                        >
+                            Êtes-vous sûr de vouloir modifier votre task ?
+                        </Text>
+
+                        <Text
+                            style={{
+                                color: "#959595",
+                                fontSize: 15,
+                                fontStyle: "italic",
+                                textAlign: "center"
+                            }}
+                        >
+                            (La modification de votre task sera irréversible. Vous avez le droit qu'à une seule modification par task.)
+                        </Text>
+
                         <View
                             style={{
-                                top: 0,
-                                position: "absolute",
-                                zIndex: 99,
-                                alignSelf: "center",
-                                padding: 10,
-                                width: "80%",
-                                backgroundColor: "black",
-                                opacity: 0.85,
-                                borderRadius: 20
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginTop: 20,
+                                width: "70%"
                             }}
-                            onTouchEnd={() => setShowTitleDesc(false)}
                         >
-                            <View
+                            <TouchableOpacity
                                 style={{
+                                    width: "100%",
+                                    backgroundColor: "red",
+                                    borderRadius: 20,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 10,
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                                activeOpacity={0.7}
+                                onPress={onSubmit}
+                            >
+                                <Text style={{color: "white", fontSize: 18}}>
+                                    oui
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={{
+                                    width: "100%",
+                                    backgroundColor: "#25995C",
+                                    borderRadius: 20,
+                                    paddingHorizontal: 5,
+                                    paddingVertical: 10,
                                     justifyContent: "center",
                                     alignItems: "center",
-                                    padding: 5
+                                    marginTop: 5
                                 }}
+                                activeOpacity={0.7}
+                                onPress={() => setShowModifyTask(false)}
                             >
-                                <Text
-                                    style={{
-                                        fontSize: 22,
-                                        color: "white",
-                                        textDecorationLine: "underline"
-                                    }}
-                                >
-                                    Aide:
+                                <Text style={{color: "white", fontSize: 18}}>
+                                    non
                                 </Text>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: "white",
-                                        marginTop: 6,
-                                        lineHeight: 25
-                                    }}
-                                >
-                                    Le titre doit être <Bold text={"clair"}/> et <Bold text={"précis"}/>.
-                                    Il doit permettre aux autres d'identifier le mieux ce qu'est votre task en seulement <Bold text={"quelques mots"}/>.
-                                    {"\n"}<Text style={{textDecorationLine: "underline"}}>Exemple</Text>: Déchets sur la plage, Plantation d'arbres, etc.
-                                </Text>
-                            </View>
-
+                            </TouchableOpacity>
                         </View>
-                    )}
+                    </View>
+                </View>
+
+            )}
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.content}>
 
                     {/*--------Title part--------*/}
                     <View
@@ -258,25 +304,6 @@ export default function CreateTask({navigation}) {
                         >
                             Titre
                         </Text>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: "black",
-                                height: 30,
-                                width: 30,
-                                borderRadius: 100,
-                                marginLeft: 20,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                opacity: 0.7
-                            }}
-                            onPress={() => setShowTitleDesc(true)}
-                        >
-                            <FontAwesome5
-                                name={"question"}
-                                size={15}
-                                color={"white"}
-                            />
-                        </TouchableOpacity>
                     </View>
                     <View
                         style={{
@@ -286,7 +313,7 @@ export default function CreateTask({navigation}) {
                         }}
                     >
                         <TextInput
-                            placeholder={"Ce qui caractèrise le mieux votre task..."}
+                            placeholder={"Modifier le titre..."}
                             style={styles.input}
                             onChangeText={(arg) => {
                                 let update = {}
@@ -294,6 +321,7 @@ export default function CreateTask({navigation}) {
                                 setTaskInfo((prevState) => ({...prevState, ...update}))
                             }}
                             keyboardType={"twitter"}
+                            value={taskInfo.title}
                         />
                         <Text
                             style={{
@@ -309,55 +337,6 @@ export default function CreateTask({navigation}) {
                     </View>
                     {/*--------Title part--------*/}
 
-                    {showDescDesc && (
-                        <View
-                            style={{
-                                top: descPos,
-                                position: "absolute",
-                                zIndex: 99,
-                                alignSelf: "center",
-                                padding: 10,
-                                width: "80%",
-                                opacity: 0.85,
-                                backgroundColor: "black",
-                                borderRadius: 20
-                            }}
-                            onTouchEnd={() => setShowDescDesc(false)}
-                        >
-                            <View
-                                style={{
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    padding: 10
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: 22,
-                                        color: "white",
-                                        textDecorationLine: "underline"
-                                    }}
-                                >
-                                    Aide:
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: "white",
-                                        marginTop: 6,
-                                        lineHeight: 25
-                                    }}
-                                >
-                                    La description doit <Bold text={"détailler"}/> la task le plus <Bold text={"précisement"}/> possible.
-                                    {"\n"}C'est à dire: <Bold text={"décrire"}/> en quoi elle consiste, ce qu'il faut faire lorsque l'on est sur les lieux, <Bold text={"comment s'y prendre"}/>,
-                                    quel serait <Bold text={"l'outillage nécessaire"}/>, <Bold text={"combien de personnes"} /> il faudrait, le temps que ça pourrait prendre, etc...
-                                    {"\n"}N'hésitez à conseiller, ainsi qu'à indiquer s'il faut une <Bold text={"qualité spécifique"}/> pour accomplir efficacement la task !
-                                </Text>
-                            </View>
-                        </View>
-                    )}
-
-
                     {/*--------Description part--------*/}
                     <View
                         style={{
@@ -365,10 +344,6 @@ export default function CreateTask({navigation}) {
                             justifyContent: "center",
                             alignItems: "center",
                             width: "100%"
-                        }}
-                        onLayout={(event) => {
-                            const { x, y } = event.nativeEvent.layout;
-                            setDescPos(y);
                         }}
                     >
                         <Text
@@ -380,27 +355,8 @@ export default function CreateTask({navigation}) {
                         >
                             Description
                         </Text>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: "black",
-                                height: 30,
-                                width: 30,
-                                borderRadius: 100,
-                                marginLeft: 20,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                opacity: 0.7,
-                                top: 15
-                            }}
-                            onPress={() => setShowDescDesc(true)}
-                        >
-                            <FontAwesome5
-                                name={"question"}
-                                size={15}
-                                color={"white"}
-                            />
-                        </TouchableOpacity>
                     </View>
+
                     <View
                         style={{
                             flexDirection: "row",
@@ -409,7 +365,7 @@ export default function CreateTask({navigation}) {
                         }}
                     >
                         <TextInput
-                            placeholder={"Décrivez la task au maximum..."}
+                            placeholder={"Modifier la description..."}
                             style={styles.inputArea}
                             multiline={true}
                             numberOfLines={20}
@@ -419,6 +375,7 @@ export default function CreateTask({navigation}) {
                                 setTaskInfo((prevState) => ({...prevState, ...update}))
                             }}
                             keyboardType={"twitter"}
+                            value={taskInfo.description}
                         />
                         <Text
                             style={{
@@ -434,54 +391,6 @@ export default function CreateTask({navigation}) {
                     </View>
                     {/*--------Description part--------*/}
 
-                    {showPhotosDesc && (
-                        <View
-                            style={{
-                                top: photoPos,
-                                position: "absolute",
-                                zIndex: 99,
-                                alignSelf: "center",
-                                padding: 10,
-                                width: "80%",
-                                backgroundColor: "black",
-                                opacity: 0.85,
-                                borderRadius: 20
-                            }}
-                            onTouchEnd={() => setShowPhotosDesc(false)}
-                        >
-                            <View
-                                style={{
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    padding: 10
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: 22,
-                                        color: "white",
-                                        textDecorationLine: "underline"
-                                    }}
-                                >
-                                    Aide:
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: "white",
-                                        marginTop: 6,
-                                        lineHeight: 25
-                                    }}
-                                >
-                                    Choisissez des photos pour <Bold text={"illustrer"}/> ce que vous avez mis dans la description.
-                                    La personne qui choisira la task doit <Bold text={"savoir à quoi s'attendre"}/>.
-                                    {"\n"}<Text style={{textDecorationLine: "underline"}}>Conseil</Text>: Choisissez au moins 5 photos !
-                                </Text>
-                            </View>
-                        </View>
-                    )}
-
-
                     {/*--------Photos part--------*/}
                     <View
                         style={{
@@ -489,10 +398,6 @@ export default function CreateTask({navigation}) {
                             justifyContent: "center",
                             alignItems: "center",
                             width: "100%"
-                        }}
-                        onLayout={(event) => {
-                            const { x, y } = event.nativeEvent.layout;
-                            setPhotoPos(y);
                         }}
                     >
                         <Text
@@ -504,29 +409,9 @@ export default function CreateTask({navigation}) {
                         >
                             Photos
                         </Text>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: "black",
-                                height: 30,
-                                width: 30,
-                                borderRadius: 100,
-                                marginLeft: 20,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                opacity: 0.7,
-                                top: 10
-                            }}
-                            onPress={() => setShowPhotosDesc(true)}
-                        >
-                            <FontAwesome5
-                                name={"question"}
-                                size={15}
-                                color={"white"}
-                            />
-                        </TouchableOpacity>
                     </View>
 
-                    {images.length <= 0 ? (
+                    {images.length < 1 ? (
                         <View
                             style={{
                                 marginTop: 20,
@@ -560,10 +445,10 @@ export default function CreateTask({navigation}) {
 
                             {images.map((image, index) => (
                                 <PhotoCard
-                                    tempImage={image.uri}
+                                    tempImage={image.uri ? image.uri : image}
                                     key={index}
                                     navigation={navigation}
-                                    deleteImage={(stateImage) => setImages(images.filter((image) => image.uri !== stateImage))}
+                                    deleteImage={(stateImage) => setImages(images.filter((image) => image.uri ? image.uri !== stateImage : image !== stateImage))}
                                 />
                             ))}
                         </ScrollView>
@@ -581,19 +466,18 @@ export default function CreateTask({navigation}) {
                     </Text>
                     {/*--------Photos part--------*/}
 
-
                     {/*--------Location part--------*/}
                     {!location ? (
-                            <Text
-                                style={{
-                                    color: "#25995C",
-                                    fontSize: 22,
-                                    marginTop: 20,
-                                    marginBottom: 20
-                                }}
-                            >
-                                Géolocalisation en cours...
-                            </Text>
+                        <Text
+                            style={{
+                                color: "#25995C",
+                                fontSize: 22,
+                                marginTop: 20,
+                                marginBottom: 20
+                            }}
+                        >
+                            Géolocalisation en cours...
+                        </Text>
                     ) :  location !== 'denied' ? (
                         <View
                             style={{
@@ -617,17 +501,17 @@ export default function CreateTask({navigation}) {
                     {/*--------Submit part--------*/}
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={onSubmit}
+                        onPress={() => setShowModifyTask(true)}
                     >
                         {!publishingTask ? (
-                            <Text style={{color: "white", fontSize: 22}}>Créer la task</Text>
+                            <Text style={{color: "white", fontSize: 22}}>Modifier la task</Text>
                         ) : (
-                            <Text style={{color: "white", fontSize: 22}}>Création...</Text>
+                            <Text style={{color: "white", fontSize: 22}}>Modification...</Text>
                         )}
                     </TouchableOpacity>
                     {/*--------Submit part--------*/}
-
                 </View>
+
             </ScrollView>
             <BottomTab navigation={navigation} />
         </>
@@ -678,12 +562,6 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
 })
-
-function Bold ({text}) {
-    return (
-        <Text style={{fontWeight: "bold"}}>{text}</Text>
-    )
-}
 
 function PhotoCard({tempImage, setImages, deleteImage, navigation}) {
     const pickImage = () => {

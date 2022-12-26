@@ -1,34 +1,117 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import ImageSwap from "../MissionCards/ImageSwap";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import {useUserContext} from "../../context/userContext";
 import CommentTab from "./CommentTab";
+import {collection, getDocs, limit, orderBy, query, onSnapshot, doc, where} from "firebase/firestore";
+import {db} from "../../firebase";
+import Loading from "../Loading";
+import Octicons from "react-native-vector-icons/Octicons";
 
 
-export default function NewMissionDetailPart({missionData, hasVote, navigation}) {
+export default function NewMissionDetailPart({missionData, hasVote, navigation, callbackUpdate, commentTabPos, callbackReplyTo, cbScrollRef, callbackCommentBubble, route}) {
     const [profilePicture, setProfilePicture] = useState("https://firebasestorage.googleapis.com/v0/b/worldtask-test.appspot.com/o/profile-picture%2Fblank_pp.png?alt=media&token=f3a7e038-17f6-47f4-a187-16cf7c188b05");
     const [username, setUsername] = useState("------");
     const {getUserFromDb, user} = useUserContext()
+    const [loadedMissionData, setLoadedMissionData] = useState(missionData);
+
+    const [scrollUpdate, setScrollUpdate] = useState(0);
+
+    const [topLoading, setTopLoading] = useState(false);
+
+    const [updateCommentTab, setUpdateCommentTab] = useState(0);
+
+    const scrollRef = useRef(null)
+    const scrollPositionTop = useRef(0)
+
+    const reloadMissionData = () => {
+        setTopLoading(true)
+        onSnapshot(doc(db, "new_tasks", missionData.uid), (doc) => {
+            setLoadedMissionData(doc.data())
+            setTopLoading(false)
+        });
+    }
 
     useEffect(() => {
-        getUserFromDb(missionData.creator).then((res) => {
+        reloadMissionData()
+        cbScrollRef(scrollRef)
+
+        getUserFromDb(loadedMissionData.creator).then((res) => {
             res?.forEach((doc) => {
-                console.log(doc.data())
                 setProfilePicture(doc.data().profilePicture)
                 setUsername(doc.data().username)
             })
         })
-    }, [])
+    }, [scrollUpdate, callbackUpdate])
+
+    const delay = (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+
 
     const formatDate = () => {
-        const submitDate = new Date(missionData.creation_date.seconds * 1000)
+        let submitDate
+        if (loadedMissionData.creation_date !== null) {
+            submitDate = new Date(loadedMissionData.creation_date.seconds*1000)
+        } else {
+            submitDate = new Date(Date.now())
+
+        }
         return {localeDate: submitDate.toLocaleDateString(), hours: submitDate.getHours(), minutes: submitDate.getMinutes()}
     }
 
+    const handleScrollEndDrag = (event) => {
+        const currentScrollPosition = event.nativeEvent.contentOffset.y;
+
+        if (currentScrollPosition <= 0) {
+            const scrollDifference = currentScrollPosition - scrollPositionTop.current;
+            if (Math.abs(scrollDifference) > 50 && !topLoading) {
+                setScrollUpdate(scrollUpdate+1)
+            }
+        }
+        scrollPositionTop.current = currentScrollPosition;
+    };
+    //
+    // const handleScrollBottom = (event) => {
+    //     const currentScrollPosition = event.nativeEvent.contentOffset.y;
+    //     const totalHeight = event.nativeEvent.contentSize.height;
+    //
+    //     // Calculate the current scroll percentage
+    //     const scrollPercentage = currentScrollPosition / totalHeight;
+    //     console.log(scrollPercentage)
+    //     if (scrollPercentage > 0.8 && !bottomLoading && !loading) {
+    //         setBottomLoading(true)
+    //         const q = query(collection(db, "comments"), orderBy("created_at", "desc"), limit(contentLimit))
+    //         getDocs(q)
+    //             .then((querySnapshot) => {
+    //                 querySnapshot.forEach((doc) => {
+    //                     if (!comments.some((item) => item.uid === doc.id)) {
+    //                             setComments((prevState) => [...prevState, doc.data()])
+    //                         }
+    //                 })
+    //             })
+    //             .finally(() => {
+    //                 setBottomLoading(false)
+    //                 setContentLimit(contentLimit+5)
+    //             })
+    //     }
+    // }
+
+    if (loadedMissionData)
     return (
-        <View style={styles.main}>
+        <ScrollView
+            scrollEventThrottle={500}
+            //onScroll={handleScrollBottom}
+            ref={scrollRef}
+            onScrollEndDrag={handleScrollEndDrag}
+        >
+            {topLoading && (
+                <View style={{marginTop: 20, marginBottom: 20}}>
+                    <ActivityIndicator size="large" color="#959595" />
+                </View>
+            )}
             <View styles={styles.missionInfos}>
                 <Text
                     style={{
@@ -37,7 +120,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         marginLeft: 6
                     }}
                 >
-                    {missionData.title}
+                    {loadedMissionData.title}
                 </Text>
 
                 <View style={styles.downSide}>
@@ -47,16 +130,16 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         color={"black"}
                     />
                     <TouchableOpacity>
-                        <Text style={styles.locationText}>{missionData.location.streetNumber} {missionData.location.streetName}, {missionData.location.city}</Text>
+                        <Text style={styles.locationText}>{loadedMissionData.location.streetNumber} {loadedMissionData.location.streetName}, {loadedMissionData.location.city}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
 
             <ImageSwap
-                images={missionData.images}
+                images={loadedMissionData.images}
                 imageHeight={300}
                 imageMarginTop={20}
-                imageIndexMarginTop={100}
+                imageIndexMarginTop={30}
                 navigation={navigation}
             />
 
@@ -82,12 +165,43 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         color: "black",
                     }}
                 >
-                    {missionData.description}
+                    {loadedMissionData.description}
                 </Text>
             </View>
 
+            {loadedMissionData.hasBeenModified && (
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        marginTop: 20,
+                        marginBottom: 20,
+                        left: 10
+                    }}
+                >
+                    <Octicons
+                        name={"pencil"}
+                        size={25}
+                        color={"#959595"}
+                    />
+
+                    <Text
+                        style={{
+                            color: "#959595",
+                            fontSize: 15,
+                            fontStyle: "italic",
+                            marginLeft: 10
+                        }}
+                    >
+                        Cette task a été modifié.
+                    </Text>
+                </View>
+            )}
+
+
             <View style={styles.bottomInfos}>
-                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: missionData.creator})}>
+                <TouchableOpacity style={styles.userInfos} onPress={() => navigation.navigate("Profile", {routeUser: loadedMissionData.creator})}>
                     <Image
                         source={{uri: profilePicture}}
                         style={{
@@ -130,29 +244,40 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                     marginTop: 20
                 }}
             >
-                <View style={styles.commentBubble}>
+                <TouchableOpacity
+                    style={styles.commentBubble}
+                    onPress={() => callbackCommentBubble(Date.now())}
+                >
                     <FontAwesome
                         name={"comment-o"}
                         size={30}
                         color={"black"}
                     />
-                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.comments.length}</Text>
-                </View>
+                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{loadedMissionData.comments.length}</Text>
+                </TouchableOpacity>
 
-                {missionData.creator === user?.uid ? (
-                    <TouchableOpacity
-                        style={{
-                            flex: 2,
-                            backgroundColor: "#25995C",
-                            height: 40,
-                            width: 30,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            borderRadius: 20
-                        }}
-                    >
-                        <Text style={{color: "white", fontSize: 22}}>Modifier</Text>
-                    </TouchableOpacity>
+                {(loadedMissionData.creator === user?.uid) ? (
+                    <>
+                        {loadedMissionData.hasBeenModified ? (
+                            <></>
+                        ) : (
+                            <TouchableOpacity
+                                style={{
+                                    flex: 2,
+                                    backgroundColor: "#25995C",
+                                    height: 40,
+                                    width: 30,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderRadius: 20
+                                }}
+                                onPress={() => navigation.navigate("ModifyTask", {routeTask: loadedMissionData})}
+                            >
+                                <Text style={{color: "white", fontSize: 22}}>Modifier</Text>
+                            </TouchableOpacity>
+                        )}
+                    </>
+
                 ) : !hasVote ? (
                     <TouchableOpacity
                         style={{
@@ -164,7 +289,7 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                             alignItems: "center",
                             borderRadius: 20
                         }}
-                        onPress={() => navigation.navigate("NewMissionVotePage", {mission: missionData})}
+                        onPress={() => navigation.navigate("NewMissionVotePage", {mission: loadedMissionData})}
                     >
                         <Text style={{color: "white", fontSize: 22}}>Voter</Text>
                     </TouchableOpacity>
@@ -198,11 +323,25 @@ export default function NewMissionDetailPart({missionData, hasVote, navigation})
                         size={30}
                         color={"black"}
                     />
-                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{missionData.shares.length}</Text>
+                    <Text style={{marginLeft: 5, fontSize: 18, fontWeight: "bold"}}>{loadedMissionData.shares.length}</Text>
                 </View>
             </View>
-            <CommentTab comments={missionData.comments} navigation={navigation}/>
-        </View>
+            <CommentTab
+                comments={
+                loadedMissionData.comments.sort((a, b) => {
+                    const dateA = new Date(a.created_at);
+                    const dateB = new Date(b.created_at);
+                    return dateB - dateA;
+                })
+            }
+                navigation={navigation}
+                commentTabPos={commentTabPos}
+                callbackReplyTo={callbackReplyTo}
+                scrollRef={scrollRef}
+                update={updateCommentTab}
+                route={route}
+            />
+        </ScrollView>
     )
 }
 
@@ -218,8 +357,9 @@ const styles = StyleSheet.create({
     downSide: {
         flexDirection: "row",
         alignItems: "center",
-        marginTop: 3,
-        marginLeft: 6
+        marginTop: 5,
+        marginLeft: 6,
+        marginBottom: 20
     },
     locationText: {
         color: "#25995C",

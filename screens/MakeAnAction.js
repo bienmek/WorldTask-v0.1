@@ -1,12 +1,30 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import SideMenu from "../components/SideMenu";
 import TopTab from "../components/TopTab";
 import BottomTab from "../components/BottomTab";
 import {ScrollView, Text, TouchableOpacity, View} from "react-native";
+import {doc, onSnapshot} from "firebase/firestore";
+import {db} from "../firebase";
+import {useUserContext} from "../context/userContext";
 
 
 export default function MakeAnAction({navigation}) {
     const [displayMenu, setDisplayMenu] = useState(false);
+    const [canCreateTask, setCanCreateTask] = useState(false);
+    const [error, setError] = useState('');
+
+    const {user} = useUserContext()
+
+    useEffect(() => {
+        setError("")
+        onSnapshot(doc(db, "taskers", user.uid), (snapshot) => {
+            const dbUser = snapshot.data()
+            if (!dbUser.ongoing_task) {
+                setCanCreateTask(true)
+            }
+        })
+    }, []);
+
 
     return (
         <>
@@ -47,7 +65,14 @@ export default function MakeAnAction({navigation}) {
                             justifyContent: "center",
                             alignItems: "center"
                         }}
-                        onPress={() => navigation.navigate("CreateTask")}
+                        onPress={() => {
+                            if (canCreateTask) {
+                                setError("")
+                                navigation.navigate("CreateTask")
+                            } else {
+                                setError("Erreur: vous avez déjà une task en cours !")
+                            }
+                        }}
                     >
                         <Text
                             style={{
@@ -101,6 +126,18 @@ export default function MakeAnAction({navigation}) {
                         </Text>
                     </View>
                 </View>
+
+                {error && (
+                    <Text
+                        style={{
+                            color: "red",
+                            fontSize: 13,
+                            alignSelf: "center",
+                        }}
+                    >
+                        {error}
+                    </Text>
+                )}
             </ScrollView>
             <BottomTab navigation={navigation} />
         </>

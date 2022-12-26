@@ -21,7 +21,7 @@ export default function Loading() {
                 position: "absolute",
                 height: "100%",
                 width: "100%",
-                zIndex: 99,
+                zIndex: 999,
                 backgroundColor: "white"
             }}
         >

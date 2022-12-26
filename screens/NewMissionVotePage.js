@@ -46,10 +46,10 @@ export default function NewMissionVotePage({route, navigation}) {
     const {user} = useUserContext()
 
     useEffect(() => {
-        Keyboard.addListener('keyboardDidShow', () => {
+        Keyboard.addListener('keyboardWillShow', () => {
             setKeyboardPadding(200)
         })
-        Keyboard.addListener('keyboardDidHide', () => {
+        Keyboard.addListener('keyboardWillHide', () => {
             setKeyboardPadding(0)
         })
     }, [Keyboard])
@@ -62,7 +62,7 @@ export default function NewMissionVotePage({route, navigation}) {
             mission_relevance: missionRelevance !== "2",
             missionDifficulty: missionDifficulty,
             reason: reason,
-            other_precision: otherText
+            other_precision: otherText > 250 ? otherText.substring(0, 250) : otherText
         }
         updateDoc(missionRef, {votes: arrayUnion(newVote)})
             .then(() => {
@@ -498,6 +498,7 @@ export default function NewMissionVotePage({route, navigation}) {
                             const { y } = event.nativeEvent.layout;
                             console.log("Reason pos", y)
                             setReasonPos(y);
+                            scrollRef?.current?.scrollToEnd({animated: true})
                         }}
                     >
                         <View
@@ -682,10 +683,9 @@ function DropdownMenu ({callBackReason, isOpen, isOther}) {
                         }}
                     >
                         {data.map((reason, index) => (
-                            <>
+                            <View key={index} style={{width: "100%"}}>
                                 {selectedValue !== reason && (
                                     <TouchableOpacity
-                                        key={index}
                                         onPress={() => {
                                             callBackReason(reason)
                                             setSelectedValue(reason)
@@ -717,7 +717,7 @@ function DropdownMenu ({callBackReason, isOpen, isOther}) {
                                         </Text>
                                     </TouchableOpacity>
                                 )}
-                            </>
+                            </View>
                         ))}
                     </View>
                 )}
